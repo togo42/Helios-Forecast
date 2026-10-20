@@ -285,6 +285,20 @@ def exercise(source, work):
     push("branch_creation_wrong_scope", target, "0" * 40, False)
     git(repo, "config", "aiReview.deliveryBase", base)
     push("unrelated_pushed_target", base, base, False)
+    remote_ahead = git(
+        repo,
+        "-c",
+        "user.name=Offline R",
+        "-c",
+        "user.email=offline@example.invalid",
+        "commit-tree",
+        git(repo, "rev-parse", target + "^{tree}"),
+        "-p",
+        target,
+        "-m",
+        "independent remote commit omitted by pushed target",
+    )
+    push("non_fast_forward_remote", target, remote_ahead, False)
     for name in ("docs/new.md", "untracked.txt"):
         file = repo / name
         before = file.read_bytes() if file.exists() else None
