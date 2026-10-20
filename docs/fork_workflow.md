@@ -122,3 +122,22 @@ and retain the existing domain, config entries, entity registry, recorder and
 learned state. Check that entry and entity IDs, services and archive access match
 the saved inventory. If state has been changed by a later incompatible version,
 restore the complete matching backup instead of deleting storage keys manually.
+
+## Mandatory AI review for every delivery
+
+Follow [AGENTS.md](../AGENTS.md) for every change, including documents and CI.
+Commit a clean snapshot and review the full frozen delivery range via
+`bash scripts/ai_review.sh --full --ref BASE`; scripts/policy/CI additionally
+require `--meta`. `--target PIN` reviews a selected existing commit using the
+current trusted helper policy. Verify each receipt with
+`python3 scripts/ai_review.py check --ref BASE --mode full --receipt PATH`
+(and meta where applicable). Resolve all findings/conditions and review again.
+Provider output and receipts remain ignored under `reviews/ai/`.
+
+Optionally enable local push enforcement after valid receipts exist using
+`bash scripts/install_review_hook.sh --ref BASE`; this pins the complete delivery
+base in local Git configuration. Select it explicitly again for the next delivery.
+Existing custom hooks are never overwritten. The hook checks every pushed SHA
+and full/meta coverage; GitHub CI only tests the helper offline. There is no
+server-side provider review enforcement. Reviews never grant publication or HA
+rollout permission. No global model configuration is changed.

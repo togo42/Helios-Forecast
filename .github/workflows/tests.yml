@@ -27,6 +27,7 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install pytest==9.1.1
+      - run: bash -n scripts/ai_review.sh scripts/ai_review_provider.sh scripts/ai_review_transport.sh scripts/install_review_hook.sh .githooks/pre-push
       - run: pytest -q tests --ignore=tests/ha
 
   home-assistant:
