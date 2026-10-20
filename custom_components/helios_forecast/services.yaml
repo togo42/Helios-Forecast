@@ -1,5 +1,10 @@
 get_forecast:
   fields:
+    include_provenance:
+      default: false
+      selector:
+        boolean:
+
     config_entry_id:
       required: false
       example: 1a2b3c4d5e6f7g8h9i0j

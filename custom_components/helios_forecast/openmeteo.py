@@ -26,6 +26,7 @@ from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, TypeVar
 
 from .weather_transport import coalesced_fetch
+from .provenance import http_receipt
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -152,6 +153,8 @@ class WeatherSeries:
     cloud_spread: list[Optional[float]] = field(default_factory=list)
     # The original successful HTTP receipt, retained across cache copies.
     received_at: datetime | None = None
+    retrieval: str = "unknown"
+    receipts: list[dict[str, Any]] = field(default_factory=list)
 
 
 def build_weather_url(
@@ -337,8 +340,14 @@ async def _fetch_parsed_uncached(
         payload = await _get_json(session, url)
         result = parser(payload) if payload is not None else None
         if result is not None:
-            if isinstance(result, WeatherSeries):
-                result = replace(result, received_at=datetime.now(timezone.utc))
+            if isinstance(result, WeatherSeries) and payload is not None:
+                receipt = http_receipt(payload)
+                result = replace(
+                    result,
+                    received_at=datetime.fromisoformat(receipt["received_at"]),
+                    receipts=[receipt],
+                    retrieval="network",
+                )
             return result
         if attempt + 1 < _RETRY_ATTEMPTS:
             await asyncio.sleep(_RETRY_DELAY_S)
@@ -349,14 +358,32 @@ async def _fetch_parsed(
     session: ClientSession, url: str, parser: Callable[[dict[str, Any]], Optional[_T]]
 ) -> Optional[_T]:
     """Share successful identical requests briefly, preserving retry and timeout semantics."""
-    return await coalesced_fetch(session, url, parser, lambda: _fetch_parsed_uncached(session, url, parser))
+    return await coalesced_fetch(
+        session,
+        url,
+        parser,
+        lambda: _fetch_parsed_uncached(session, url, parser),
+        on_reuse=lambda value: replace(value, retrieval="cache") if isinstance(value, WeatherSeries) else value,
+    )
 
 
-async def _ensemble_spread(session: ClientSession, url: str) -> Optional[tuple[list[datetime], list[float]]]:
+@dataclass(frozen=True)
+class _ReceivedSpread:
+    times: list[datetime]
+    values: list[float]
+    receipt: dict[str, Any]
+
+
+def _parse_received_spread(payload: dict[str, Any]) -> _ReceivedSpread | None:
+    spread = parse_cloud_spread(payload)
+    return _ReceivedSpread(spread[0], spread[1], http_receipt(payload)) if spread is not None else None
+
+
+async def _ensemble_spread(session: ClientSession, url: str) -> _ReceivedSpread | None:
     """Best-effort ensemble fetch: any failure, whether a bad response exhausting its retries or a
     raised transport error, reads as 'no spread this refresh' instead of failing the whole call."""
     try:
-        return await _fetch_parsed(session, url, parse_cloud_spread)
+        return await _fetch_parsed(session, url, _parse_received_spread)
     except Exception:
         return None
 
@@ -392,4 +419,7 @@ async def fetch_weather(
         return None
     if isinstance(spread, BaseException) or spread is None:
         return series
-    return _overlay_cloud_spread(series, spread[0], spread[1])
+    return replace(
+        _overlay_cloud_spread(series, spread.times, spread.values),
+        receipts=series.receipts + [spread.receipt],
+    )

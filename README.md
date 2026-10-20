@@ -349,3 +349,8 @@ Licensed under the GNU General Public License v3.0, see [LICENSE](LICENSE).
 Shared weather requests (unreleased): identical session/URL/parser requests share
 successful parsed data for up to 300 seconds; results are copied. Failures and
 cancellations are not cached. See WEATHER_API.md. Existing output shapes remain.
+
+
+Optional provenance (unreleased): `helios_forecast.get_forecast` accepts
+`include_provenance: true` to include reproducibility metadata. Default response
+and all point values remain unchanged. See PROVENANCE_API.md.

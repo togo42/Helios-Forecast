@@ -465,6 +465,10 @@ def test_weather_cache_preserves_original_receipt():
         assert first is not None and second is not None
         assert first.received_at is not None
         assert first.received_at == second.received_at
+        assert first.retrieval == "network"
+        assert second.retrieval == "cache"
+        assert first.receipts == second.receipts
+        assert len(first.receipts) == 2
         assert first is not second
 
     asyncio.run(run())

@@ -10,6 +10,7 @@ attribute or polling the websocket the card uses.
 from __future__ import annotations
 
 from typing import Any
+from copy import deepcopy
 
 import voluptuous as vol
 from homeassistant.core import HomeAssistant, ServiceCall, SupportsResponse, callback
@@ -25,6 +26,7 @@ _SERVICE_GET_BATTERY_SOC = "get_battery_soc_forecast"
 _SERVICES_REGISTERED = f"{DOMAIN}_services_registered"
 
 _SCHEMA = vol.Schema({vol.Optional("config_entry_id"): cv.string})
+_FORECAST_SCHEMA = _SCHEMA.extend({vol.Optional("include_provenance", default=False): cv.boolean})
 
 
 def _soc_point_dict(p: BatterySocPoint) -> dict[str, Any]:
@@ -63,7 +65,10 @@ def async_register_services(hass: HomeAssistant) -> None:
         """Return the production forecast curve (today onward) for one installation."""
         data = _resolve(call).data
         points = data.points if data is not None else []
-        return {"forecast": [forecast_point_dict(p) for p in points]}
+        response: dict[str, Any] = {"forecast": [forecast_point_dict(p) for p in points]}
+        if call.data.get("include_provenance"):
+            response["provenance"] = deepcopy(getattr(data, "provenance", None)) if data is not None else None
+        return response
 
     async def _async_get_battery_soc(call: ServiceCall) -> dict[str, Any]:
         """Return the projected battery SoC curve (next 48 h) for one installation.
@@ -78,7 +83,7 @@ def async_register_services(hass: HomeAssistant) -> None:
         DOMAIN,
         _SERVICE_GET_FORECAST,
         _async_get_forecast,
-        schema=_SCHEMA,
+        schema=_FORECAST_SCHEMA,
         supports_response=SupportsResponse.ONLY,
     )
     hass.services.async_register(

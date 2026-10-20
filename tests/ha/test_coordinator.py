@@ -736,3 +736,21 @@ async def test_cached_weather_keeps_original_archive_cutoff(hass, monkeypatch):
     await coordinator.async_refresh()
     assert coordinator.last_update_success
     assert coordinator._weather_fetched_at == original
+
+
+async def test_refresh_binds_actual_inputs_and_fallback_provenance(hass, monkeypatch):
+    received = dt_util.utcnow() - timedelta(hours=1)
+    weather = replace(make_weather_series(dt_util.utcnow()), received_at=received, retrieval="cache")
+    coordinator = HeliosForecastCoordinator(hass, _entry(hass))
+    mock = AsyncMock(side_effect=[weather, None])
+    monkeypatch.setattr(coordinator_mod, "fetch_weather", mock)
+    await coordinator.async_refresh()
+    first = coordinator.data.provenance
+    assert first["schema_version"] == "helios.forecast.v1"
+    assert first["weather"]["received_at"] == received.isoformat()
+    assert first["weather"]["retrieval"] == "cache"
+    assert first["learning"]["input_count"] == len(coordinator._production_buckets)
+    await coordinator.async_refresh()
+    assert coordinator.data.provenance["weather"]["received_at"] == received.isoformat()
+    assert coordinator.data.provenance["weather"]["content_sha256"] == first["weather"]["content_sha256"]
+    assert coordinator.data.provenance["weather"]["retrieval"] == "stale"

@@ -9,6 +9,7 @@ a settings key outliving the code that wrote it is how one gets into such a file
 from __future__ import annotations
 
 from dataclasses import asdict
+from copy import deepcopy
 from typing import Any, Dict
 
 from homeassistant.config_entries import ConfigEntry
@@ -46,4 +47,5 @@ async def async_get_config_entry_diagnostics(hass: HomeAssistant, entry: ConfigE
     }
     if coordinator.data is not None:
         out["reliability"] = asdict(coordinator.data.reliability)
+        out["provenance"] = deepcopy(coordinator.data.provenance)
     return out
