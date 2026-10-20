@@ -1,15 +1,11 @@
 """Replay the learning offline, day after day, against what the roof really produced.
 
-Everything the forecast is made of is a pure function, so a day can be re-forecast as the
-integration would have forecast it that morning: the residual map and the analog library are
-rebuilt from the history available at 06:00 local, then the day is predicted and scored against the
-meter. The archived weather stands in for the forecast weather, which removes the weather error
-from the picture on purpose: what is measured here is the learning, not Open-Meteo.
+The real residual map and analog library are rebuilt from production available at 06:00 local,
+then subsequent daylight hours are scored against the meter. Weather is the retrospective hourly
+archive and may contain later corrections: this isolates learning conditional on archived weather,
+not the skill of original issued forecasts. Optional variants are uncalibrated research comparisons.
 
-Variants of the pipeline are scored side by side, by sun altitude, so a change to the learning is
-measured on sixty days before it is written into the integration.
-
-Usage: .venv/bin/python tools/replay/replay.py [--days 30]  (data from tools/replay/fetch.mjs)
+Usage: python tools/replay/replay.py --config CONFIG --data-dir DATA --days 30
 """
 
 from __future__ import annotations
@@ -18,9 +14,11 @@ import argparse
 import json
 import math
 import os
+import re
 import sys
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 from typing import Dict, List, Optional
 from zoneinfo import ZoneInfo
 
@@ -28,85 +26,185 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", ".."))
 
 from custom_components.helios_forecast import analog  # noqa: E402
 from custom_components.helios_forecast.analog import AnalogSample, build_library, enrich_points  # noqa: E402
-from custom_components.helios_forecast.forecast import ForecastPoint, build_forecast_series  # noqa: E402
+from custom_components.helios_forecast.forecast import (  # noqa: E402
+    build_forecast_series,
+    hardware_power_limit_w,
+    limit_forecast_power,
+)
 from custom_components.helios_forecast.openmeteo import WeatherSeries  # noqa: E402
 from custom_components.helios_forecast.solar.geometry import sun_position  # noqa: E402
 from custom_components.helios_forecast.solar.power import (  # noqa: E402
-    PanelOrientation, PvLayout, WeatherSample, compute_pv_power_per_array,
+    PanelOrientation,
+    PvLayout,
 )
 from custom_components.helios_forecast.solar import residual as RS  # noqa: E402
 from custom_components.helios_forecast.solar.residual import (  # noqa: E402
-    LEARN_DAYS, ProductionBucket, SkyResidualInput, SkyResidualMap, build_sky_residual_map,
+    LEARN_DAYS,
+    ProductionBucket,
+    SkyResidualInput,
+    SkyResidualMap,
+    build_sky_residual_map,
+    implausible_hour,
 )
 
-HERE = os.path.dirname(__file__)
-TZ = ZoneInfo("Europe/Paris")
 
-# Jerome's installation, as declared in the integration (core.config_entries, 2026-09-06).
-LAT, LON = 44.10974, 1.40441
-LAYOUT = PvLayout(orientations=[PanelOrientation(tilt_deg=13.0, azimuth_deg=188.0, tracker=None)],
-                  shares=[1.0], coords=[None], total_kwp=3.0, caps=[])
-CAP_W = 3200.0
+@dataclass(frozen=True)
+class ReplayConfig:
+    """Explicit local installation inputs; never inferred from another installation."""
+
+    lat: float
+    lon: float
+    timezone: ZoneInfo
+    layout: PvLayout
+    inverter_max_w: float
+    entry_id: str = ""
+    production_statistic: str = ""
+
+    @classmethod
+    def load(cls, path: Path) -> ReplayConfig:
+        raw = json.loads(path.read_text())
+        if not isinstance(raw["entry_id"], str) or not re.fullmatch(r"[A-Za-z0-9_-]+", raw["entry_id"]):
+            raise ValueError("entry_id must be a config entry identifier")
+        if not isinstance(raw["production_statistic"], str) or not raw["production_statistic"]:
+            raise ValueError("production_statistic is required")
+        lat = _number(raw["latitude"], "latitude", -90, 90)
+        lon = _number(raw["longitude"], "longitude", -180, 180)
+        arrays = raw["arrays"]
+        if not arrays:
+            raise ValueError("arrays must contain at least one panel line")
+        sizes = [_number(a["kwp"], "kwp", 0, math.inf, positive=True) for a in arrays]
+        coords = []
+        for a in arrays:
+            if ("latitude" in a) != ("longitude" in a):
+                raise ValueError("per-line latitude and longitude must be supplied together")
+            coords.append(
+                (_number(a["latitude"], "latitude", -90, 90), _number(a["longitude"], "longitude", -180, 180))
+                if "latitude" in a
+                else None
+            )
+            if a.get("tracker") not in (None, "dual-axis", "single-axis-h", "single-axis-v"):
+                raise ValueError("unsupported tracker")
+        total = _number(sum(sizes), "total_kwp", 0, math.inf, positive=True)
+        layout = PvLayout(
+            orientations=[
+                PanelOrientation(
+                    _number(a["tilt_deg"], "tilt_deg", 0, 90),
+                    _number(a["azimuth_deg"], "azimuth_deg", 0, 360),
+                    a.get("tracker"),
+                )
+                for a in arrays
+            ],
+            shares=[size / total for size in sizes],
+            coords=coords,
+            total_kwp=total,
+            caps=[_cap(a.get("inverter_max_w")) for a in arrays],
+        )
+        return cls(
+            lat,
+            lon,
+            ZoneInfo(raw["timezone"]),
+            layout,
+            _cap(raw.get("inverter_max_w")),
+            raw["entry_id"].lower(),
+            raw["production_statistic"],
+        )
 
 
-def load_weather() -> WeatherSeries:
-    raw = json.load(open(os.path.join(HERE, "data", "weather.json")))
-    by_t: Dict[int, Dict[str, float]] = {}
-    for field, rows in raw.items():
-        for start_ms, mean in rows:
-            if mean is not None:
-                by_t.setdefault(int(start_ms), {})[field] = float(mean)
+def _number(value, name, low, high, *, positive=False):
+    if isinstance(value, bool) or not isinstance(value, (float, int)) or not math.isfinite(value):
+        raise ValueError(f"{name} must be a finite number")
+    if not low <= value <= high or (positive and value <= 0):
+        raise ValueError(f"{name} outside supported range")
+    return float(value)
+
+
+def _cap(value):
+    return math.inf if value is None else _number(value, "inverter_max_w", 0, math.inf, positive=True)
+
+
+def _finite(value):
+    return isinstance(value, (float, int)) and not isinstance(value, bool) and math.isfinite(value)
+
+
+WEATHER_FIELDS = ("cloud_cover", "ghi", "direct", "diffuse", "temperature", "wind_speed", "snow_depth")
+
+
+def load_weather(data_dir: Path) -> WeatherSeries:
+    raw = json.loads((data_dir / "weather.json").read_text())
+    by_t = {}
+    for field in WEATHER_FIELDS:
+        for start_ms, mean in raw.get(field, []):
+            if not _finite(start_ms) or start_ms % 3_600_000:
+                raise ValueError("weather timestamps must be UTC hour starts in epoch milliseconds")
+            value = float(mean) if _finite(mean) else None
+            if field != "temperature" and value is not None and value < 0:
+                value = None
+            if field == "cloud_cover" and value is not None and value > 100:
+                value = None
+            hour = by_t.setdefault(int(start_ms), {})
+            if field in hour and hour[field] != value:
+                raise ValueError(f"conflicting weather values for {field} at {start_ms}")
+            hour[field] = value
     times = sorted(by_t)
-    pick = lambda t, f, default: by_t[t].get(f, default)  # noqa: E731
+    values = [[by_t[t].get(field) for t in times] for field in WEATHER_FIELDS]
     return WeatherSeries(
         times=[datetime.fromtimestamp(t / 1000, tz=timezone.utc) for t in times],
-        cloud=[pick(t, "cloud_cover", 0.0) for t in times],
-        shortwave=[pick(t, "global_irradiance", 0.0) for t in times],
-        direct=[pick(t, "direct_irradiance", 0.0) for t in times],
-        diffuse=[pick(t, "diffuse_irradiance", 0.0) for t in times],
-        temp=[pick(t, "temperature", 20.0) for t in times],
-        wind=[pick(t, "wind_speed", 0.0) for t in times],
-        snow=[pick(t, "snow_depth", 0.0) for t in times],
+        cloud=values[0],
+        shortwave=values[1],
+        direct=values[2],
+        diffuse=values[3],
+        temp=values[4],
+        wind=values[5],
+        snow=values[6],
     )
 
 
-def load_production() -> List[ProductionBucket]:
-    rows = json.load(open(os.path.join(HERE, "data", "production.json")))
-    out = []
+def load_production(data_dir: Path) -> List[ProductionBucket]:
+    rows = json.loads((data_dir / "production.json").read_text())
+    out = {}
     for start_ms, end_ms, change in rows:
-        if change is None or not math.isfinite(change) or change < 0:
-            continue  # a meter reset reads as a huge negative hour; the integration skips it too
-        out.append(ProductionBucket(start_ms=float(start_ms), end_ms=float(end_ms), kwh=float(change)))
-    return out
+        if not _finite(start_ms) or not _finite(end_ms):
+            continue
+        if end_ms - start_ms != 3_600_000 or start_ms % 3_600_000:
+            raise ValueError("production must contain UTC-aligned one-hour kWh changes")
+        if not _finite(change) or change < 0:
+            continue
+        bucket = ProductionBucket(float(start_ms), float(end_ms), float(change))
+        if start_ms in out and out[start_ms] != bucket:
+            raise ValueError(f"conflicting production values at {start_ms}")
+        out[start_ms] = bucket
+    return [out[t] for t in sorted(out)]
 
 
 def measured_map(buckets: List[ProductionBucket]) -> Dict[int, float]:
-    """kWh per local hour, keyed on the epoch ms of the hour's start."""
-    return {int(b.start_ms): b.kwh for b in buckets}
+    """Validated hourly kWh; valid measured zero remains a scoreable observation."""
+    out = {}
+    for b in buckets:
+        if not _finite(b.kwh) or b.kwh < 0 or b.end_ms - b.start_ms != 3_600_000:
+            continue
+        if b.start_ms % 3_600_000:
+            continue
+        if b.start_ms in out and out[b.start_ms] != b.kwh:
+            raise ValueError("conflicting production observations")
+        out[int(b.start_ms)] = b.kwh
+    return out
 
 
-def physics_w(moment: datetime, weather: WeatherSeries, epochs: List[float]) -> float:
-    """Bare physical watts at an instant, from the archived weather, the way the residual map sees it."""
-    ms = moment.timestamp() * 1000
-    i = max(0, min(len(epochs) - 1, _nearest(epochs, ms)))
-    sample = WeatherSample(cloud=weather.cloud[i] or 0.0, ghi=weather.shortwave[i], direct=weather.direct[i],
-                           diffuse=weather.diffuse[i], temp=weather.temp[i], wind=weather.wind[i])
-    pcts = compute_pv_power_per_array(moment, LAT, LON, sample, LAYOUT)
-    return max(0.0, min(CAP_W, pcts[0] * LAYOUT.total_kwp * 10.0))
-
-
-def _nearest(epochs: List[float], ms: float) -> int:
-    lo, hi = 0, len(epochs) - 1
-    while hi - lo > 1:
-        mid = (lo + hi) // 2
-        if epochs[mid] <= ms:
-            lo = mid
-        else:
-            hi = mid
-    return lo if abs(epochs[lo] - ms) <= abs(epochs[hi] - ms) else hi
+def usable_weather_hours(weather: WeatherSeries) -> set[int]:
+    """Require actual adjacent-hour cloud and irradiance evidence, never fill a gap."""
+    usable = set()
+    for i, t in enumerate(weather.times):
+        if not _finite(weather.cloud[i]) or not 0 <= weather.cloud[i] <= 100:
+            continue
+        ghi = weather.shortwave[i]
+        direct, diffuse = weather.direct[i], weather.diffuse[i]
+        if (_finite(ghi) and ghi >= 0) or (all(_finite(v) and v >= 0 for v in (direct, diffuse))):
+            usable.add(int(t.timestamp() * 1000))
+    return {t for t in usable if t + 3_600_000 in usable}
 
 
 # ---- variants of the analog step ------------------------------------------------------------------
+
 
 def predict_variant(library, alt, az, cloud, temp, *, narrow_alt=False, az_weight=None, az_norm=180.0):
     """analog.predict with switches: altitude distance relative to the altitude itself (a low sun only
@@ -137,22 +235,44 @@ def predict_variant(library, alt, az, cloud, temp, *, narrow_alt=False, az_weigh
     return analog.AnalogBand(p10=p10, p50=p50, p90=p90, confidence=confidence, ceiling=ceiling)
 
 
-def enrich_variant(points, library, weather, w_epochs, now, *, ratio_lib=False, narrow_alt=False, max_conf=1.0,
-                   az_weight=None, az_norm=180.0):
+def enrich_variant(
+    points,
+    library,
+    weather,
+    w_epochs,
+    now,
+    *,
+    ratio_lib=False,
+    narrow_alt=False,
+    max_conf=1.0,
+    az_weight=None,
+    az_norm=180.0,
+    config,
+):
+    if not library:
+        return points
     out = []
     for p in points:
         if p.t < now:
             out.append(p)
             continue
-        sun = sun_position(p.t, LAT, LON)
+        sun = sun_position(p.t, config.lat, config.lon)
         if sun.altitude <= 0:
             out.append(replace(p, pv_p10=0.0, pv_p90=0.0))
             continue
         ms = p.t.timestamp() * 1000.0
         cloud = analog._sample_series(weather.times, weather.cloud, ms, w_epochs)
         temp = analog._sample_series(weather.times, weather.temp, ms, w_epochs)
-        band = predict_variant(library, sun.altitude, sun.azimuth, cloud if cloud is not None else 50.0, temp,
-                               narrow_alt=narrow_alt, az_weight=az_weight, az_norm=az_norm)
+        band = predict_variant(
+            library,
+            sun.altitude,
+            sun.azimuth,
+            cloud if cloud is not None else 50.0,
+            temp,
+            narrow_alt=narrow_alt,
+            az_weight=az_weight,
+            az_norm=az_norm,
+        )
         if band is None:
             out.append(p)
             continue
@@ -166,31 +286,21 @@ def enrich_variant(points, library, weather, w_epochs, now, *, ratio_lib=False, 
         blended = c * p50 + (1.0 - c) * p.pv_w
         if ceiling is not None:
             blended = min(blended, ceiling)
-        out.append(replace(p, pv_w=blended, pv_p10=p10, pv_p90=p90) if band.confidence >= analog.BAND_MIN_CONFIDENCE
-                   else replace(p, pv_w=blended))
+        out.append(
+            replace(p, pv_w=blended, pv_p10=p10, pv_p90=p90)
+            if band.confidence >= analog.BAND_MIN_CONFIDENCE
+            else replace(p, pv_w=blended)
+        )
     return out
 
 
-def ratio_library(buckets, weather, epochs) -> List[AnalogSample]:
-    """The analog library with each sample's watts replaced by its ratio to the physics of that hour."""
-    lib = build_library(buckets, weather, LAT, LON)
-    out = []
-    it = iter(lib)
-    for b in buckets:
-        mid = datetime.fromtimestamp((b.start_ms + b.end_ms) / 2000.0, tz=timezone.utc)
-        if sun_position(mid, LAT, LON).altitude <= 0 or not math.isfinite(b.kwh):
-            continue
-        s = next(it, None)
-        if s is None:
-            break
-        model = physics_w(mid, weather, epochs)
-        if model < 30.0:
-            continue  # a ratio against nothing says nothing
-        out.append(AnalogSample(alt=s.alt, az=s.az, cloud=s.cloud, watt=s.watt / model, temp=s.temp))
-    return out
+def ratio_library(library) -> List[AnalogSample]:
+    """Exploratory ratio values from the same validated model samples, without re-pairing rows."""
+    return [replace(s, watt=s.ratio) for s in analog.ratio_samples(library)]
 
 
 # ---- a variant of the residual map's smoothing ---------------------------------------------------
+
 
 def vertical_map(inp: SkyResidualInput) -> Optional[SkyResidualMap]:
     """The residual map with its thin cells filled from the sky ABOVE and BELOW them at the same azimuth
@@ -251,102 +361,241 @@ def band_of(sun) -> str:
     return "%s %s" % (half, "0-15" if alt < 15 else ("15-30" if alt < 30 else "30+"))
 
 
-def replay(days: int) -> None:
-    weather = load_weather()
-    epochs = [t.timestamp() * 1000.0 for t in weather.times]
-    buckets = load_production()
+def score_points(points, measured, config, now, usable_hours):
+    """Match four quarter-hours to one measured hourly energy change.
+
+    Instantaneous P10/P90 cannot be scored against hourly energy; no band coverage is inferred.
+    """
+    by_hour = {}
+    for point in points:
+        hour = int(point.t.timestamp() * 1000) // 3_600_000 * 3_600_000
+        by_hour.setdefault(hour, []).append(point)
+    scores = {band: {"n": 0, "abs_w": 0.0, "pred_kwh": 0.0, "truth_kwh": 0.0} for band in BANDS + ["total"]}
+    for hour, group in by_hour.items():
+        if hour not in measured or hour not in usable_hours or hour < now.timestamp() * 1000:
+            continue
+        expected = {hour + i * 900_000 for i in range(4)}
+        if len(group) != 4 or {int(p.t.timestamp() * 1000) for p in group} != expected:
+            continue
+        if any(not _finite(p.pv_w) for p in group):
+            continue
+        mid = datetime.fromtimestamp(hour / 1000 + 1800, tz=timezone.utc)
+        sun = sun_position(mid, config.lat, config.lon)
+        if sun.altitude <= 0:
+            continue
+        truth = measured[hour]
+        if not _finite(truth) or truth < 0 or implausible_hour(truth, hour, hour + 3_600_000, config.layout.total_kwp):
+            continue
+        pred = sum(p.pv_w for p in group) / 4 / 1000
+        for key in (band_of(sun), "total"):
+            score = scores[key]
+            score["n"] += 1
+            score["abs_w"] += abs(pred - truth) * 1000
+            score["pred_kwh"] += pred
+            score["truth_kwh"] += truth
+    return scores
+
+
+def run_replay(weather, buckets, config, first_day, end_day, *, variants=False):
+    """Rebuild learners at 06:00 local for each date in [first_day, end_day).
+
+    Only production strictly before the evaluation origin is used for training. Archived weather
+    is retrospective: this tests the learner conditional on archived weather, not forecast skill.
+    """
+    if first_day >= end_day:
+        raise ValueError("first day must precede exclusive end day")
+    for boundary in (first_day, end_day):
+        if boundary.tzinfo is None or boundary.astimezone(config.timezone).time() != datetime.min.time():
+            raise ValueError("replay boundaries must be local midnights")
     measured = measured_map(buckets)
-    last_full = datetime.now(TZ).replace(hour=0, minute=0, second=0, microsecond=0)
-    first = last_full - timedelta(days=days)
-
-    VARIANTS = ["physique", "residuel seul", "pipeline actuel", "pipeline 2026.9.2 (watts)", "analogues azimut pese", "analogues sur ratios",
-                "ratios + azimut pese", "lissage vertical seul", "vertical + pipeline", "vertical + ratios + azimut"]
-    acc = {v: {b: {"n": 0, "abs": 0.0, "pred": 0.0, "truth": 0.0} for b in BANDS + ["total"]} for v in VARIANTS}
-    daily = {v: [] for v in VARIANTS}
-    band_cov = {v: [0, 0] for v in VARIANTS}
-    w_epochs = analog.series_epochs(weather.times)
-
-    day = first
-    while day < last_full:
+    usable = usable_weather_hours(weather)
+    epochs = analog.series_epochs(weather.times)
+    names = ["physics", "residual", "current"]
+    if variants:
+        names += [
+            "exploratory watts",
+            "exploratory azimuth",
+            "exploratory ratios",
+            "exploratory ratios azimuth",
+            "exploratory vertical",
+            "exploratory vertical current",
+        ]
+    hardware_max_w = hardware_power_limit_w(config.layout, config.inverter_max_w)
+    scores = {
+        name: {band: {"n": 0, "abs_w": 0.0, "pred_kwh": 0.0, "truth_kwh": 0.0} for band in BANDS + ["total"]}
+        for name in names
+    }
+    origins = []
+    skipped = []
+    day = first_day.astimezone(config.timezone)
+    while day < end_day:
         now = day.replace(hour=6)
-        now_ms = now.timestamp() * 1000.0
-        history = [b for b in buckets if b.end_ms <= now_ms and b.start_ms >= (now - timedelta(days=LEARN_DAYS)).timestamp() * 1000]
-        if len(history) < 24 * 10:
+        now_ms = now.timestamp() * 1000
+        cutoff = (now - timedelta(days=LEARN_DAYS)).timestamp() * 1000
+        history = [
+            b
+            for b in buckets
+            if b.end_ms <= now_ms
+            and b.start_ms >= cutoff
+            and b.start_ms in measured
+            and b.start_ms in usable
+            and not getattr(b, "curtailed", False)
+            and not implausible_hour(b.kwh, b.start_ms, b.end_ms, config.layout.total_kwp)
+        ]
+        # Count distinct valid hours, so duplicate input cannot manufacture sufficient history.
+        history = list({b.start_ms: b for b in history}.values())
+        if len(history) < 240:
+            skipped.append(day.date().isoformat())
             day += timedelta(days=1)
             continue
         inp = SkyResidualInput(
-            lat=LAT, lon=LON, layout=LAYOUT, production=history, cloud_times=epochs, cloud=weather.cloud,
-            shortwave=weather.shortwave, direct=weather.direct, diffuse=weather.diffuse, temp=weather.temp,
-            wind=weather.wind, snow=weather.snow, now_ms=now_ms)
+            lat=config.lat,
+            lon=config.lon,
+            layout=config.layout,
+            production=history,
+            inverter_max_w=config.inverter_max_w,
+            cloud_times=epochs,
+            cloud=weather.cloud,
+            shortwave=weather.shortwave,
+            direct=weather.direct,
+            diffuse=weather.diffuse,
+            temp=weather.temp,
+            wind=weather.wind,
+            snow=weather.snow,
+            now_ms=now_ms,
+        )
         sky = build_sky_residual_map(inp)
-        vsky = vertical_map(inp)
-        start, end = day, day + timedelta(days=1)
-        base = build_forecast_series(weather, LAYOUT, LAT, LON, inverter_max_w=CAP_W, start=start, end=end,
-                                     step_minutes=15, residual_map=sky)
-        vbase = build_forecast_series(weather, LAYOUT, LAT, LON, inverter_max_w=CAP_W, start=start, end=end,
-                                      step_minutes=15, residual_map=vsky)
-        library = build_library(history, weather, LAT, LON, LAYOUT, CAP_W)  # the integration's own call, ratios included
-        watts_library = build_library(history, weather, LAT, LON)  # the pre-2026.9.3 library, watts only
-        rlib = ratio_library(history, weather, epochs)
-        AZ = dict(az_weight=0.7, az_norm=90.0)
+        end = day + timedelta(days=1)
+        base = build_forecast_series(
+            weather,
+            config.layout,
+            config.lat,
+            config.lon,
+            inverter_max_w=config.inverter_max_w,
+            start=day,
+            end=end,
+            step_minutes=15,
+            residual_map=sky,
+        )
+        library = build_library(history, weather, config.lat, config.lon, config.layout, config.inverter_max_w)
         series = {
-            "physique": [replace(p, pv_w=p.pv_raw_w) for p in base],
-            "residuel seul": base,
-            "pipeline actuel": enrich_points(base, library, weather, LAT, LON, now),
-            "pipeline 2026.9.2 (watts)": enrich_points(base, watts_library, weather, LAT, LON, now),
-            "analogues azimut pese": enrich_variant(base, watts_library, weather, w_epochs, now, **AZ),
-            "analogues sur ratios": enrich_variant(base, rlib, weather, w_epochs, now, ratio_lib=True),
-            "ratios + azimut pese": enrich_variant(base, rlib, weather, w_epochs, now, ratio_lib=True, **AZ),
-            "lissage vertical seul": vbase,
-            "vertical + pipeline": enrich_points(vbase, library, weather, LAT, LON, now),
-            "vertical + ratios + azimut": enrich_variant(vbase, rlib, weather, w_epochs, now, ratio_lib=True, **AZ),
+            "physics": [replace(p, pv_w=p.pv_raw_w) for p in base],
+            "residual": base,
+            "current": enrich_points(base, library, weather, config.lat, config.lon, now, hardware_max_w),
         }
-        for name, pts in series.items():
-            by_hour: Dict[int, List[ForecastPoint]] = {}
-            for p in pts:
-                by_hour.setdefault(int(p.t.replace(minute=0, second=0, microsecond=0).timestamp() * 1000), []).append(p)
-            day_pred = day_truth = 0.0
-            for hour_ms, group in by_hour.items():
-                truth = measured.get(hour_ms)
-                mid = datetime.fromtimestamp(hour_ms / 1000 + 1800, tz=timezone.utc)
-                sun = sun_position(mid, LAT, LON)
-                if truth is None or truth <= 0 or sun.altitude <= 0 or mid < now:
-                    continue
-                pred_w = sum(p.pv_w for p in group) / len(group)
-                truth_w = truth * 1000.0
-                for key in (band_of(sun), "total"):
-                    a = acc[name][key]
-                    a["n"] += 1; a["abs"] += abs(pred_w - truth_w); a["pred"] += pred_w; a["truth"] += truth_w
-                day_pred += pred_w / 1000; day_truth += truth
-                lo = [p.pv_p10 for p in group if p.pv_p10 is not None]
-                hi = [p.pv_p90 for p in group if p.pv_p90 is not None]
-                if lo and hi:
-                    band_cov[name][1] += 1
-                    band_cov[name][0] += (min(lo) <= truth_w <= max(hi))
-            if day_truth > 0.3:
-                daily[name].append((day_pred - day_truth) / day_truth * 100)
-        day += timedelta(days=1)
+        if variants:
+            watts = build_library(history, weather, config.lat, config.lon)
+            ratios = ratio_library(library)
+            az = dict(az_weight=0.7, az_norm=90.0)
+            vbase = build_forecast_series(
+                weather,
+                config.layout,
+                config.lat,
+                config.lon,
+                inverter_max_w=config.inverter_max_w,
+                start=day,
+                end=end,
+                step_minutes=15,
+                residual_map=vertical_map(inp),
+            )
+            series.update(
+                {
+                    "exploratory watts": enrich_variant(base, watts, weather, epochs, now, config=config),
+                    "exploratory azimuth": enrich_variant(base, watts, weather, epochs, now, config=config, **az),
+                    "exploratory ratios": enrich_variant(
+                        base, ratios, weather, epochs, now, config=config, ratio_lib=True
+                    ),
+                    "exploratory ratios azimuth": enrich_variant(
+                        base, ratios, weather, epochs, now, config=config, ratio_lib=True, **az
+                    ),
+                    "exploratory vertical": vbase,
+                    "exploratory vertical current": enrich_points(
+                        vbase, library, weather, config.lat, config.lon, now, hardware_max_w
+                    ),
+                }
+            )
+        for name, points in series.items():
+            points = [limit_forecast_power(p, hardware_max_w) for p in points]
+            result = score_points(points, measured, config, now, usable)
+            for band, values in result.items():
+                for key, value in values.items():
+                    scores[name][band][key] += value
+        origins.append(
+            {
+                "date": day.date().isoformat(),
+                "training_hours": len(history),
+                "latest_training_end_ms": max(b.end_ms for b in history),
+                "origin_ms": now_ms,
+            }
+        )
+        day = end
+    return {
+        "scores": scores,
+        "origins": origins,
+        "skipped_history_days": skipped,
+        "band_coverage": None,
+        "scope": "retrospective archived-weather learning replay",
+    }
 
-    print("Replay on %d days, hourly, sun up, meter above zero. Per cell: nMAE (W/kWc) and bias; last column: mean absolute error on the day's energy." % days)
-    print("%-27s" % "" + "".join("%11s" % b for b in BANDS) + "%11s %8s" % ("TOTAL", "jour"))
-    for v in VARIANTS:
-        cells = []
-        for b in BANDS + ["total"]:
-            a = acc[v][b]
-            cells.append("%3.0f %+4.0f%%" % (a["abs"] / a["n"] / LAYOUT.total_kwp, 100 * (a["pred"] - a["truth"]) / a["truth"]) if a["n"] else "    -    ")
-        d = daily[v]
-        mape = sum(abs(x) for x in d) / len(d) if d else float("nan")
-        print("%-27s" % v + "".join("%11s" % c for c in cells) + "%8s" % ("%.1f%%" % mape))
-    print("  n par cellule : " + " ".join("%s=%d" % (b, acc["physique"][b]["n"]) for b in BANDS))
-    print("\nCouverture de la fourchette P10-P90 (objectif 80 %) :")
-    for v in VARIANTS:
-        hit, n = band_cov[v]
-        if n:
-            print("  %-27s %5.1f%%  (n=%d)" % (v, 100 * hit / n, n))
+
+def print_report(result, config):
+    print(result["scope"])
+    print("Hourly daylight score after 06:00 local; measured zero included; incomplete evidence excluded.")
+    print("Matched hours only; archived weather is retrospective, not original issued forecast evidence.")
+    print("P10/P90 coverage omitted: hourly energy cannot validate instantaneous power quantiles.")
+    for name, bands in result["scores"].items():
+        total = bands["total"]
+        n = total["n"]
+        if not n:
+            print(f"{name}: no matched hours")
+            continue
+        nmae = total["abs_w"] / n / config.layout.total_kwp
+        delta = total["pred_kwh"] - total["truth_kwh"]
+        print(f"{name}: n={n}, nMAE={nmae:.2f} W/kWp, matched energy error={delta:+.3f} kWh")
+    print(f"History-gated dates skipped: {len(result['skipped_history_days'])}")
+
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument("--data-dir", type=Path, required=True)
+    parser.add_argument("--days", type=int, default=30)
+    parser.add_argument("--end-date", help="exclusive local YYYY-MM-DD; default today")
+    parser.add_argument("--variants", action="store_true", help="include uncalibrated exploratory variants")
+    parser.add_argument("--json-output", type=Path)
+    args = parser.parse_args(argv)
+    if args.days <= 0:
+        parser.error("--days must be positive")
+    try:
+        config = ReplayConfig.load(args.config)
+        end = datetime.fromisoformat(args.end_date) if args.end_date else datetime.now(config.timezone)
+        end = end.replace(hour=0, minute=0, second=0, microsecond=0, tzinfo=config.timezone)
+        metadata_path = args.data_dir / "metadata.json"
+        if metadata_path.exists():
+            metadata = json.loads(metadata_path.read_text())
+            if (metadata.get("entry_id"), metadata.get("production_statistic")) != (
+                config.entry_id,
+                config.production_statistic,
+            ):
+                raise ValueError("export metadata does not match configured entry and production statistic")
+        result = run_replay(
+            load_weather(args.data_dir),
+            load_production(args.data_dir),
+            config,
+            end - timedelta(days=args.days),
+            end,
+            variants=args.variants,
+        )
+        print_report(result, config)
+        if args.json_output:
+            args.json_output.write_text(json.dumps(result, indent=2, allow_nan=False) + "\n")
+        if not result["scores"]["current"]["total"]["n"]:
+            print("No scoreable observations; supply sufficient history and overlapping valid inputs.", file=sys.stderr)
+            return 2
+        return 0
+    except (ValueError, KeyError, TypeError, OSError) as err:
+        parser.error(str(err))
 
 
 if __name__ == "__main__":
-    ap = argparse.ArgumentParser()
-    ap.add_argument("--days", type=int, default=30)
-    args = ap.parse_args()
-    replay(args.days)
+    raise SystemExit(main())
