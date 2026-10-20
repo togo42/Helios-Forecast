@@ -7,6 +7,7 @@
 > the mirrored main/development branch. HACS identifies the fork separately;
 > it retains the same integration domain and cannot coexist as a second copy.
 > [Candidate notes](docs/rc2_release_2026-10-20.md) ·
+> [Qualitätsanalyse und Arbeitsplan](docs/analyse_und_arbeitsplan_2026-10-20.md) ·
 > [Build, contribution, migration and rollback](docs/fork_workflow.md).
 >
 > The upstream README and attribution below are retained as upstream documentation;
