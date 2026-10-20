@@ -58,3 +58,23 @@ suite must validate that repair; results belong in separate candidate/R evidence
 
 Final external full review and exact-revision GitHub checks remain required
 before publication. Their separate evidence must be read with this report.
+
+## Final local gate readback
+
+The dedicated test-only repair is commit
+`95285edb394b55511e88e186a58aca7d4df9a93b`: one freezer argument and a fixed
+`2026-10-20T12:30:00+00:00` move before setup. The coordinator inspected that
+complete diff. Production sources and the release builder remain unchanged.
+
+The author subsequently reported real successful exits for 267 pure tests,
+139 full HA tests (`-n8`, unchanged plugin configuration), the targeted rollover
+test, and Ruff lint/format. The separate clock-fixture acceptance compared all
+25 original assertion/mock-assert call ASTs and the complete test-module AST after
+normalizing exactly those two fixture additions. All were identical. Its actual
+test passed without skips; removing the hourly listener in a disposable runtime
+copy caused the original `assert_awaited_once` to fail with zero awaits. The
+runtime inventory/content and builder matched the pre-repair source.
+
+Read `docs/fork_clock_fixture_r_2026-10-20.md` and the candidate evidence for exact
+pins, argv, exits and hash binding. These local gates permit review/publication
+preparation; they grant no productive installation or empirical acceptance.
