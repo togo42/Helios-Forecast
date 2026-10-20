@@ -950,3 +950,8 @@ Home Assistant Energy dashboard, a clean set of sensors (power now and next hour
 energy and peaks over a 7-day horizon, energy left today), and a sub-hourly detail series
 the Helios card reads. Configuration is one entry per panel line, so each roof orientation
 gets its own forecast, device and entities.
+
+
+Shared weather requests (unreleased): identical session/URL/parser requests share
+successful parsed data for up to 300 seconds; results are copied. Failures and
+cancellations are not cached. See WEATHER_API.md. Existing output shapes remain.

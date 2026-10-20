@@ -449,3 +449,8 @@ orientation.
   costs every other integration on the machine that hour of history. Anything
   worth keeping beyond what an entity's own state gives goes to
   `helios_forecast:<entry_id>_<series>`.
+
+
+Shared weather requests (unreleased): identical session/URL/parser requests share
+successful parsed data for up to 300 seconds; results are copied. Failures and
+cancellations are not cached. See WEATHER_API.md. Existing output shapes remain.
