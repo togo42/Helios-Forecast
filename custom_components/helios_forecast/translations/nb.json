@@ -24,13 +24,13 @@
           "battery_min_soc": "Batterireserve, minimalt ladenivå (%, standard 10)",
           "battery_efficiency": "Batteriets rundturs-virkningsgrad (%, standard 90)",
           "curtailment_entity": "Begrensningssignal (binær sensor, input boolean eller bryter, valgfritt)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Streng læringskvalitet"
         },
         "data_description": {
           "production_entity": "En kumulativ energisensor (kWh), f.eks. inverterens eller strømmålerens totale produksjon. En effektsensor (W) fungerer ikke: den har ingen langtidsstatistikk for summen, så læringen og pålitelighetsindeksen ville forbli av.",
           "battery_soc_entity": "Fyll inn kapasiteten og denne sensoren for å slå på ladenivåprojeksjonen. Husforbruket hentes fra Energi-dashbordet ditt, så det trengs ingen sensor her.",
           "curtailment_entity": "På så lenge inverteren holdes tilbake av en grunn himmelen ikke forklarer: fullt batteri, null eksport, nettgrense. Timene den markerer læres ikke som lav produksjon. Uten den oppdages et fullt batteri fortsatt fra ladetilstandssensoren og invertertaket.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Lær bare av hele timer med et uttrykkelig avslått begrensningssignal. Manglende historikk utelates. Av som standard."
         }
       },
       "line": {
@@ -76,13 +76,13 @@
           "battery_min_soc": "Batterireserve, minimalt ladenivå (%, standard 10)",
           "battery_efficiency": "Batteriets rundturs-virkningsgrad (%, standard 90)",
           "curtailment_entity": "Begrensningssignal (binær sensor, input boolean eller bryter, valgfritt)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Streng læringskvalitet"
         },
         "data_description": {
           "production_entity": "En kumulativ energisensor (kWh), f.eks. inverterens eller strømmålerens totale produksjon. En effektsensor (W) fungerer ikke: den har ingen langtidsstatistikk for summen, så læringen og pålitelighetsindeksen ville forbli av.",
           "battery_soc_entity": "Fyll inn kapasiteten og denne sensoren for å slå på ladenivåprojeksjonen. Husforbruket hentes fra Energi-dashbordet ditt, så det trengs ingen sensor her.",
           "curtailment_entity": "På så lenge inverteren holdes tilbake av en grunn himmelen ikke forklarer: fullt batteri, null eksport, nettgrense. Timene den markerer læres ikke som lav produksjon. Uten den oppdages et fullt batteri fortsatt fra ladetilstandssensoren og invertertaket.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Lær bare av hele timer med et uttrykkelig avslått begrensningssignal. Manglende historikk utelates. Av som standard."
         }
       },
       "lines": {

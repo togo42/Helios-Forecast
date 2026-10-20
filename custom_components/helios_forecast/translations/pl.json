@@ -24,13 +24,13 @@
           "battery_min_soc": "Rezerwa akumulatora, minimalny stan naładowania (%, domyślnie 10)",
           "battery_efficiency": "Sprawność cyklu akumulatora (%, domyślnie 90)",
           "curtailment_entity": "Sygnał ograniczenia (czujnik binarny, input boolean lub przełącznik, opcjonalnie)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Ścisła jakość uczenia"
         },
         "data_description": {
           "production_entity": "Skumulowany czujnik energii (kWh), np. całkowita produkcja falownika lub licznika. Czujnik mocy (W) nie zadziała: nie ma długoterminowych statystyk sumy, więc uczenie i wskaźnik wiarygodności pozostałyby wyłączone.",
           "battery_soc_entity": "Wypełnij pojemność i ten czujnik, aby włączyć prognozę stanu naładowania. Zużycie domu jest pobierane z panelu Energia, tutaj nie jest potrzebny żaden czujnik.",
           "curtailment_entity": "Włączony, gdy falownik jest ograniczany z powodu, którego niebo nie tłumaczy: pełny akumulator, zerowy eksport, limit sieci. Oznaczone godziny nie są uczone jako niska produkcja. Bez niego pełny akumulator jest nadal wykrywany z czujnika stanu naładowania i limitu falownika.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Ucz się tylko z pełnych godzin z jawnie wyłączonym sygnałem ograniczenia. Brakująca historia jest wykluczana. Domyślnie wyłączone."
         }
       },
       "line": {
@@ -76,13 +76,13 @@
           "battery_min_soc": "Rezerwa akumulatora, minimalny stan naładowania (%, domyślnie 10)",
           "battery_efficiency": "Sprawność cyklu akumulatora (%, domyślnie 90)",
           "curtailment_entity": "Sygnał ograniczenia (czujnik binarny, input boolean lub przełącznik, opcjonalnie)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Ścisła jakość uczenia"
         },
         "data_description": {
           "production_entity": "Skumulowany czujnik energii (kWh), np. całkowita produkcja falownika lub licznika. Czujnik mocy (W) nie zadziała: nie ma długoterminowych statystyk sumy, więc uczenie i wskaźnik wiarygodności pozostałyby wyłączone.",
           "battery_soc_entity": "Wypełnij pojemność i ten czujnik, aby włączyć prognozę stanu naładowania. Zużycie domu jest pobierane z panelu Energia, tutaj nie jest potrzebny żaden czujnik.",
           "curtailment_entity": "Włączony, gdy falownik jest ograniczany z powodu, którego niebo nie tłumaczy: pełny akumulator, zerowy eksport, limit sieci. Oznaczone godziny nie są uczone jako niska produkcja. Bez niego pełny akumulator jest nadal wykrywany z czujnika stanu naładowania i limitu falownika.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Ucz się tylko z pełnych godzin z jawnie wyłączonym sygnałem ograniczenia. Brakująca historia jest wykluczana. Domyślnie wyłączone."
         }
       },
       "lines": {

@@ -20,4 +20,4 @@ Checks: full-hour off, first sample mid-hour, unknown gaps, partial on, legacy
 unchanged, missing/failed signal, both learning inputs identical, UI round trip,
 and unknown buckets rejected in strict mode. No training quality certification.
 
-New locale keys currently use an explicit English fallback; existing translations are preserved.
+Only new locale keys are translated; existing translations are preserved.

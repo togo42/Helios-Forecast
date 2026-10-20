@@ -24,13 +24,13 @@
           "battery_min_soc": "Batteriereserve, minimaler Ladezustand (%, Standard 10)",
           "battery_efficiency": "Round-Trip-Wirkungsgrad der Batterie (%, Standard 90)",
           "curtailment_entity": "Abregelungssignal (Binärsensor, Input Boolean oder Schalter, optional)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Strenge Lernqualität"
         },
         "data_description": {
           "production_entity": "Ein kumulativer Energiesensor (kWh), z. B. die Gesamtproduktion Ihres Wechselrichters oder Energiezählers. Ein Leistungssensor (W) funktioniert nicht: er hat keine Langzeit-Summenstatistik, das Lernen und der Zuverlässigkeitsindex blieben inaktiv.",
           "battery_soc_entity": "Kapazität und diesen Sensor ausfüllen, um die Ladezustandsprognose zu aktivieren. Der Hausverbrauch stammt aus deinem Energie-Dashboard, hier ist kein Sensor nötig.",
           "curtailment_entity": "Ein, solange Ihr Wechselrichter aus einem Grund gedrosselt wird, den der Himmel nicht erklärt: volle Batterie, Nulleinspeisung, Netzlimit. Die markierten Stunden werden nicht als niedrige Produktion gelernt. Ohne dieses Signal wird eine volle Batterie weiterhin über den Ladezustandssensor und die Wechselrichtergrenze erkannt.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Nur vollständige Stunden mit ausdrücklich ausgeschaltetem Begrenzungssignal lernen. Fehlende Historie wird ausgeschlossen. Standardmäßig ausgeschaltet."
         }
       },
       "line": {
@@ -76,13 +76,13 @@
           "battery_min_soc": "Batteriereserve, minimaler Ladezustand (%, Standard 10)",
           "battery_efficiency": "Round-Trip-Wirkungsgrad der Batterie (%, Standard 90)",
           "curtailment_entity": "Abregelungssignal (Binärsensor, Input Boolean oder Schalter, optional)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Strenge Lernqualität"
         },
         "data_description": {
           "production_entity": "Ein kumulativer Energiesensor (kWh), z. B. die Gesamtproduktion Ihres Wechselrichters oder Energiezählers. Ein Leistungssensor (W) funktioniert nicht: er hat keine Langzeit-Summenstatistik, das Lernen und der Zuverlässigkeitsindex blieben inaktiv.",
           "battery_soc_entity": "Kapazität und diesen Sensor ausfüllen, um die Ladezustandsprognose zu aktivieren. Der Hausverbrauch stammt aus deinem Energie-Dashboard, hier ist kein Sensor nötig.",
           "curtailment_entity": "Ein, solange Ihr Wechselrichter aus einem Grund gedrosselt wird, den der Himmel nicht erklärt: volle Batterie, Nulleinspeisung, Netzlimit. Die markierten Stunden werden nicht als niedrige Produktion gelernt. Ohne dieses Signal wird eine volle Batterie weiterhin über den Ladezustandssensor und die Wechselrichtergrenze erkannt.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Nur vollständige Stunden mit ausdrücklich ausgeschaltetem Begrenzungssignal lernen. Fehlende Historie wird ausgeschlossen. Standardmäßig ausgeschaltet."
         }
       },
       "lines": {

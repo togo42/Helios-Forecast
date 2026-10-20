@@ -24,13 +24,13 @@
           "battery_min_soc": "Rezerva baterije, najmanjše stanje napolnjenosti (%, privzeto 10)",
           "battery_efficiency": "Izkoristek celotnega cikla baterije (%, privzeto 90)",
           "curtailment_entity": "Signal omejevanja (binarni senzor, input boolean ali stikalo, neobvezno)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Stroga kakovost učenja"
         },
         "data_description": {
           "production_entity": "Kumulativni senzor energije (kWh), npr. skupna proizvodnja razsmernika ali števca. Senzor moči (W) ne bo deloval: nima dolgoročne statistike vsote, zato bi učenje in indeks zanesljivosti ostala izklopljena.",
           "battery_soc_entity": "Izpolnite zmogljivost in ta senzor, da vklopite projekcijo stanja napolnjenosti. Poraba doma je vzeta z nadzorne plošče Energija, senzor tukaj ni potreben.",
           "curtailment_entity": "Vklopljen, dokler je razsmernik omejen iz razloga, ki ga nebo ne pojasni: polna baterija, ničelni izvoz, omejitev omrežja. Označene ure se ne učijo kot nizka proizvodnja. Brez njega se polna baterija še vedno zazna iz senzorja stanja napolnjenosti in omejitve razsmernika.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Uči se samo iz celih ur z izrecno izklopljenim signalom omejevanja. Manjkajoča zgodovina se izključi. Privzeto izklopljeno."
         }
       },
       "line": {
@@ -76,13 +76,13 @@
           "battery_min_soc": "Rezerva baterije, najmanjše stanje napolnjenosti (%, privzeto 10)",
           "battery_efficiency": "Izkoristek celotnega cikla baterije (%, privzeto 90)",
           "curtailment_entity": "Signal omejevanja (binarni senzor, input boolean ali stikalo, neobvezno)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Stroga kakovost učenja"
         },
         "data_description": {
           "production_entity": "Kumulativni senzor energije (kWh), npr. skupna proizvodnja razsmernika ali števca. Senzor moči (W) ne bo deloval: nima dolgoročne statistike vsote, zato bi učenje in indeks zanesljivosti ostala izklopljena.",
           "battery_soc_entity": "Izpolnite zmogljivost in ta senzor, da vklopite projekcijo stanja napolnjenosti. Poraba doma je vzeta z nadzorne plošče Energija, senzor tukaj ni potreben.",
           "curtailment_entity": "Vklopljen, dokler je razsmernik omejen iz razloga, ki ga nebo ne pojasni: polna baterija, ničelni izvoz, omejitev omrežja. Označene ure se ne učijo kot nizka proizvodnja. Brez njega se polna baterija še vedno zazna iz senzorja stanja napolnjenosti in omejitve razsmernika.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Uči se samo iz celih ur z izrecno izklopljenim signalom omejevanja. Manjkajoča zgodovina se izključi. Privzeto izklopljeno."
         }
       },
       "lines": {

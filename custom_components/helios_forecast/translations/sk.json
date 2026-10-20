@@ -24,13 +24,13 @@
           "battery_min_soc": "Rezerva batérie, minimálny stav nabitia (%, predvolené 10)",
           "battery_efficiency": "Účinnosť cyklu batérie (%, predvolené 90)",
           "curtailment_entity": "Signál obmedzenia výkonu (binárny senzor, input boolean alebo spínač, voliteľné)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Prísna kvalita učenia"
         },
         "data_description": {
           "production_entity": "Kumulatívny senzor energie (kWh), napr. celková výroba striedača alebo elektromera. Senzor výkonu (W) nebude fungovať: nemá dlhodobé štatistiky súčtu, takže učenie a index spoľahlivosti by zostali vypnuté.",
           "battery_soc_entity": "Vyplňte kapacitu a tento senzor na zapnutie projekcie stavu nabitia. Spotreba domácnosti sa preberá z panela Energia, tu nie je potrebný žiadny senzor.",
           "curtailment_entity": "Zapnutý, kým je striedač obmedzovaný z dôvodu, ktorý obloha nevysvetlí: plná batéria, nulový export, limit siete. Označené hodiny sa neučia ako nízka výroba. Bez neho sa plná batéria stále rozpozná zo senzora stavu nabitia a limitu striedača.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Učí sa len z celých hodín s výslovne vypnutým signálom obmedzenia. Chýbajúca história sa vylúči. Predvolene vypnuté."
         }
       },
       "line": {
@@ -76,13 +76,13 @@
           "battery_min_soc": "Rezerva batérie, minimálny stav nabitia (%, predvolené 10)",
           "battery_efficiency": "Účinnosť cyklu batérie (%, predvolené 90)",
           "curtailment_entity": "Signál obmedzenia výkonu (binárny senzor, input boolean alebo spínač, voliteľné)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Prísna kvalita učenia"
         },
         "data_description": {
           "production_entity": "Kumulatívny senzor energie (kWh), napr. celková výroba striedača alebo elektromera. Senzor výkonu (W) nebude fungovať: nemá dlhodobé štatistiky súčtu, takže učenie a index spoľahlivosti by zostali vypnuté.",
           "battery_soc_entity": "Vyplňte kapacitu a tento senzor na zapnutie projekcie stavu nabitia. Spotreba domácnosti sa preberá z panela Energia, tu nie je potrebný žiadny senzor.",
           "curtailment_entity": "Zapnutý, kým je striedač obmedzovaný z dôvodu, ktorý obloha nevysvetlí: plná batéria, nulový export, limit siete. Označené hodiny sa neučia ako nízka výroba. Bez neho sa plná batéria stále rozpozná zo senzora stavu nabitia a limitu striedača.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Učí sa len z celých hodín s výslovne vypnutým signálom obmedzenia. Chýbajúca história sa vylúči. Predvolene vypnuté."
         }
       },
       "lines": {

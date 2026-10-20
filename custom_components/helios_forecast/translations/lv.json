@@ -24,13 +24,13 @@
           "battery_min_soc": "Akumulatora rezerve, minimālais uzlādes līmenis (%, noklusējums 10)",
           "battery_efficiency": "Akumulatora cikla lietderības koeficients (%, noklusējums 90)",
           "curtailment_entity": "Ierobežošanas signāls (binārs sensors, input boolean vai slēdzis, neobligāts)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Stingra mācīšanās kvalitāte"
         },
         "data_description": {
           "production_entity": "Kumulatīvs enerģijas sensors (kWh), piem., invertora vai skaitītāja kopējā ražošana. Jaudas sensors (W) nedarbosies: tam nav ilgtermiņa summas statistikas, tāpēc mācīšanās un uzticamības indekss paliktu izslēgti.",
           "battery_soc_entity": "Aizpildiet ietilpību un šo sensoru, lai ieslēgtu uzlādes līmeņa prognozi. Mājas patēriņš tiek ņemts no Enerģijas paneļa, sensors šeit nav vajadzīgs.",
           "curtailment_entity": "Ieslēgts, kamēr invertors tiek ierobežots iemesla dēļ, ko debesis neizskaidro: pilna baterija, nulles eksports, tīkla limits. Atzīmētās stundas netiek mācītas kā zema ražošana. Bez tā pilna baterija tik un tā tiek noteikta pēc uzlādes līmeņa sensora un invertora limita.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Mācīties tikai no pilnām stundām ar skaidri izslēgtu ierobežošanas signālu. Trūkstoša vēsture tiek izslēgta. Pēc noklusējuma izslēgts."
         }
       },
       "line": {
@@ -76,13 +76,13 @@
           "battery_min_soc": "Akumulatora rezerve, minimālais uzlādes līmenis (%, noklusējums 10)",
           "battery_efficiency": "Akumulatora cikla lietderības koeficients (%, noklusējums 90)",
           "curtailment_entity": "Ierobežošanas signāls (binārs sensors, input boolean vai slēdzis, neobligāts)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Stingra mācīšanās kvalitāte"
         },
         "data_description": {
           "production_entity": "Kumulatīvs enerģijas sensors (kWh), piem., invertora vai skaitītāja kopējā ražošana. Jaudas sensors (W) nedarbosies: tam nav ilgtermiņa summas statistikas, tāpēc mācīšanās un uzticamības indekss paliktu izslēgti.",
           "battery_soc_entity": "Aizpildiet ietilpību un šo sensoru, lai ieslēgtu uzlādes līmeņa prognozi. Mājas patēriņš tiek ņemts no Enerģijas paneļa, sensors šeit nav vajadzīgs.",
           "curtailment_entity": "Ieslēgts, kamēr invertors tiek ierobežots iemesla dēļ, ko debesis neizskaidro: pilna baterija, nulles eksports, tīkla limits. Atzīmētās stundas netiek mācītas kā zema ražošana. Bez tā pilna baterija tik un tā tiek noteikta pēc uzlādes līmeņa sensora un invertora limita.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Mācīties tikai no pilnām stundām ar skaidri izslēgtu ierobežošanas signālu. Trūkstoša vēsture tiek izslēgta. Pēc noklusējuma izslēgts."
         }
       },
       "lines": {

@@ -24,13 +24,13 @@
           "battery_min_soc": "Riserva della batteria, stato di carica minimo (%, predefinito 10)",
           "battery_efficiency": "Efficienza di andata e ritorno della batteria (%, predefinito 90)",
           "curtailment_entity": "Segnale di limitazione (sensore binario, input boolean o interruttore, opzionale)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Qualità di apprendimento rigorosa"
         },
         "data_description": {
           "production_entity": "Un sensore di energia cumulativa (kWh), ad es. la produzione totale dell'inverter o del contatore. Un sensore di potenza (W) non funzionerà: non ha statistiche di somma a lungo termine, quindi l'apprendimento e l'indice di affidabilità resterebbero inattivi.",
           "battery_soc_entity": "Compila la capacità e questo sensore per attivare la proiezione dello stato di carica. Il consumo di casa è preso dalla dashboard Energia, qui non serve alcun sensore.",
           "curtailment_entity": "Attivo finché l'inverter è limitato per un motivo che il cielo non spiega: batteria piena, immissione zero, limite di rete. Le ore che segnala non vengono apprese come produzione bassa. Senza di esso, una batteria piena viene comunque rilevata dal sensore di stato di carica e dal tetto dell'inverter.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Apprendi solo da ore complete con il segnale di limitazione esplicitamente disattivato. La cronologia mancante viene esclusa. Disattivato per impostazione predefinita."
         }
       },
       "line": {
@@ -76,13 +76,13 @@
           "battery_min_soc": "Riserva della batteria, stato di carica minimo (%, predefinito 10)",
           "battery_efficiency": "Efficienza di andata e ritorno della batteria (%, predefinito 90)",
           "curtailment_entity": "Segnale di limitazione (sensore binario, input boolean o interruttore, opzionale)",
-          "strict_learning_quality": "Learn only fully observed unconstrained hours"
+          "strict_learning_quality": "Qualità di apprendimento rigorosa"
         },
         "data_description": {
           "production_entity": "Un sensore di energia cumulativa (kWh), ad es. la produzione totale dell'inverter o del contatore. Un sensore di potenza (W) non funzionerà: non ha statistiche di somma a lungo termine, quindi l'apprendimento e l'indice di affidabilità resterebbero inattivi.",
           "battery_soc_entity": "Compila la capacità e questo sensore per attivare la proiezione dello stato di carica. Il consumo di casa è preso dalla dashboard Energia, qui non serve alcun sensore.",
           "curtailment_entity": "Attivo finché l'inverter è limitato per un motivo che il cielo non spiega: batteria piena, immissione zero, limite di rete. Le ore che segnala non vengono apprese come produzione bassa. Senza di esso, una batteria piena viene comunque rilevata dal sensore di stato di carica e dal tetto dell'inverter.",
-          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
+          "strict_learning_quality": "Apprendi solo da ore complete con il segnale di limitazione esplicitamente disattivato. La cronologia mancante viene esclusa. Disattivato per impostazione predefinita."
         }
       },
       "lines": {
