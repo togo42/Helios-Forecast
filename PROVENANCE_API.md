@@ -19,3 +19,5 @@ Checks: default service equality, opt-in null before successful update, HTTP rec
 preservation, stable canonical hashes, changed weather/config/buckets/source hash,
 JSON-safe output, and completion not earlier than its inputs. No forecast schema,
 Energy provider, archive ownership or production-control change.
+
+Only newly introduced UI strings are translated across the existing locale set; existing translations are unchanged.

@@ -128,8 +128,8 @@
           "description": "Którą instalację Helios Forecast odczytać. Opcjonalne, gdy skonfigurowana jest tylko jedna."
         },
         "include_provenance": {
-          "name": "Include provenance",
-          "description": "Include versioned computation and input metadata. Default response is unchanged."
+          "name": "Dołącz pochodzenie",
+          "description": "Dołącza wersjonowane metadane wejść i obliczeń. Domyślna odpowiedź pozostaje bez zmian."
         }
       }
     },

@@ -128,8 +128,8 @@
           "description": "Koju Helios Forecast instalaciju čitati. Neobavezno kada je konfigurirana samo jedna."
         },
         "include_provenance": {
-          "name": "Include provenance",
-          "description": "Include versioned computation and input metadata. Default response is unchanged."
+          "name": "Uključi podrijetlo",
+          "description": "Uključuje verzionirane metapodatke ulaza i izračuna. Zadani odgovor ostaje nepromijenjen."
         }
       }
     },

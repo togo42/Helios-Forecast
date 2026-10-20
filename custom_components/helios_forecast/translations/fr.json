@@ -128,8 +128,8 @@
           "description": "Quelle installation Helios Forecast lire. Facultatif s'il n'y en a qu'une de configurée."
         },
         "include_provenance": {
-          "name": "Include provenance",
-          "description": "Include versioned computation and input metadata. Default response is unchanged."
+          "name": "Inclure la provenance",
+          "description": "Inclut les métadonnées versionnées des entrées et du calcul. La réponse par défaut reste inchangée."
         }
       }
     },

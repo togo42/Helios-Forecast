@@ -128,8 +128,8 @@
           "description": "Kuru Helios Forecast instalāciju nolasīt. Nav obligāti, ja konfigurēta tikai viena."
         },
         "include_provenance": {
-          "name": "Include provenance",
-          "description": "Include versioned computation and input metadata. Default response is unchanged."
+          "name": "Iekļaut izcelsmi",
+          "description": "Iekļauj versētus ievades un aprēķina metadatus. Noklusējuma atbilde nemainās."
         }
       }
     },

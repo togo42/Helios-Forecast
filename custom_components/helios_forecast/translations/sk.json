@@ -128,8 +128,8 @@
           "description": "Ktorú inštaláciu Helios Forecast načítať. Voliteľné, keď je nakonfigurovaná len jedna."
         },
         "include_provenance": {
-          "name": "Include provenance",
-          "description": "Include versioned computation and input metadata. Default response is unchanged."
+          "name": "Zahrnúť pôvod",
+          "description": "Zahrnie verziované metadáta vstupov a výpočtu. Predvolená odpoveď sa nemení."
         }
       }
     },

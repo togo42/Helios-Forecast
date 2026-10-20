@@ -128,8 +128,8 @@
           "description": "Mikä Helios Forecast -asennus luetaan. Valinnainen, kun määritettynä on vain yksi."
         },
         "include_provenance": {
-          "name": "Include provenance",
-          "description": "Include versioned computation and input metadata. Default response is unchanged."
+          "name": "Sisällytä alkuperä",
+          "description": "Sisällyttää syötteiden ja laskennan versioidut metatiedot. Oletusvastaus ei muutu."
         }
       }
     },

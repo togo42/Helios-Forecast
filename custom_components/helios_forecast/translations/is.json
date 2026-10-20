@@ -128,8 +128,8 @@
           "description": "Hvaða Helios Forecast uppsetningu á að lesa. Valfrjálst þegar aðeins ein er stillt."
         },
         "include_provenance": {
-          "name": "Include provenance",
-          "description": "Include versioned computation and input metadata. Default response is unchanged."
+          "name": "Hafa uppruna með",
+          "description": "Bætir við útgáfugreindum lýsigögnum inntaks og útreiknings. Sjálfgefið svar er óbreytt."
         }
       }
     },

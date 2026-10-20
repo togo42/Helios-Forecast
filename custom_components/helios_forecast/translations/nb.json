@@ -128,8 +128,8 @@
           "description": "Hvilken Helios Forecast-installasjon som skal leses. Valgfritt når bare én er konfigurert."
         },
         "include_provenance": {
-          "name": "Include provenance",
-          "description": "Include versioned computation and input metadata. Default response is unchanged."
+          "name": "Ta med opprinnelse",
+          "description": "Tar med versjonerte metadata om inndata og beregning. Standardsvaret er uendret."
         }
       }
     },

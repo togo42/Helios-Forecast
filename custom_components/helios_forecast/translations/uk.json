@@ -128,8 +128,8 @@
           "description": "Яку установку Helios Forecast зчитувати. Необов'язково, коли налаштовано лише одну."
         },
         "include_provenance": {
-          "name": "Include provenance",
-          "description": "Include versioned computation and input metadata. Default response is unchanged."
+          "name": "Додати походження",
+          "description": "Додає версійовані метадані вхідних даних і обчислення. Типова відповідь залишається незмінною."
         }
       }
     },

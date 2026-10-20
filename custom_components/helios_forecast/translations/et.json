@@ -128,8 +128,8 @@
           "description": "Millist Helios Forecasti paigaldist lugeda. Valikuline, kui seadistatud on ainult üks."
         },
         "include_provenance": {
-          "name": "Include provenance",
-          "description": "Include versioned computation and input metadata. Default response is unchanged."
+          "name": "Kaasa päritolu",
+          "description": "Lisab sisendite ja arvutuse versioonitud metaandmed. Vaikevastus ei muutu."
         }
       }
     },

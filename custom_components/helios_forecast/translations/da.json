@@ -128,8 +128,8 @@
           "description": "Hvilken Helios Forecast-installation der skal læses. Valgfrit, når kun én er konfigureret."
         },
         "include_provenance": {
-          "name": "Include provenance",
-          "description": "Include versioned computation and input metadata. Default response is unchanged."
+          "name": "Medtag oprindelse",
+          "description": "Medtager versionsbestemte metadata om input og beregning. Standardsvaret er uændret."
         }
       }
     },

@@ -128,8 +128,8 @@
           "description": "Welke Helios Forecast-installatie moet worden gelezen. Optioneel wanneer er slechts één is geconfigureerd."
         },
         "include_provenance": {
-          "name": "Include provenance",
-          "description": "Include versioned computation and input metadata. Default response is unchanged."
+          "name": "Herkomst opnemen",
+          "description": "Neemt versiegebonden metadata van invoer en berekening op. Het standaardantwoord blijft ongewijzigd."
         }
       }
     },
