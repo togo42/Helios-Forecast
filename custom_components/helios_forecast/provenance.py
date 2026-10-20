@@ -49,7 +49,7 @@ def implementation() -> dict:
     """Fingerprint the installed package sources, not a guessed model/feature version."""
     root = Path(__file__).parent
     files = {str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest() for p in sorted(root.rglob("*.py"))}
-    manifest = json.loads((root / "manifest.json").read_text())
+    manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
     return {"version": manifest["version"], "implementation_sha256": digest(files), "source_files": files}
 
 
