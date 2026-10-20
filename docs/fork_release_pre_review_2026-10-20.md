@@ -48,10 +48,13 @@ Read the independent report for its exact pins, hashes and reproduction commands
 The first sequential inherited HA suite returned 138 passed and one failure in
 `tests/ha/test_init.py::test_hour_rollover_triggers_off_cycle_refresh`. At 17:01 UTC
 the unchanged base and candidate both failed that original test identically
-(`Expected mock to not have been awaited`, actual 1). This is the previously
-observed wall-clock-sensitive assertion before HH:07; it is not a newly repaired
-test or a candidate runtime regression. A full unchanged-assertion suite rerun
-after that window is required, and its result belongs in candidate evidence.
+(`Expected mock to not have been awaited`, actual 1). Subsequent source inspection
+established the exact test-entry phase as HH:09:23. HH:07 was an imprecise earlier
+observation, not its boundary. This is an inherited wall-clock-sensitive test,
+not a candidate runtime regression. The scope now permits a separate controlled
+freezer-fixture repair with every assertion and production source preserved.
+Independent assertion-AST and effective removed-listener checks plus the full HA
+suite must validate that repair; results belong in separate candidate/R evidence.
 
 Final external full review and exact-revision GitHub checks remain required
 before publication. Their separate evidence must be read with this report.

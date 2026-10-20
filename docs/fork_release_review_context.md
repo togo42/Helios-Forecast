@@ -13,6 +13,8 @@ Missing ESS documents and flow export checks are outside this delivery.
   Later documentation/test-evidence descendants must preserve runtime and builder
   blobs. The invocation's Git revision/status is authoritative for final scope.
 - Read the complete expectations in `docs/fork_release_scope_2026-10-20.md`.
+  Its bounded amendment permits only the inherited rollover test's clock fixture
+  to become deterministic, with every assertion and production source preserved.
 - All integration blobs must match the frozen base except manifest version,
   documentation, issue tracker and codeowners. Preserve domain, name, services,
   entities, configuration entries, storage, defaults and all forecast behavior.

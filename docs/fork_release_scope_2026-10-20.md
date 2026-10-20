@@ -71,3 +71,22 @@ source switch, runtime capture or restart is part of this task.
 
 The candidate retains the limits of the baseline: no new empirical winter,
 DC-constraint, calibrated daily P10 or recovery acceptance is implied.
+
+## Bounded test-fixture amendment before implementation
+
+At 17:01 UTC the inherited hour-rollover test failed identically on the unchanged
+base and candidate: advancing from before the entry's scheduled phase also fires
+that current-hour event. The test entry's phase is HH:09:23, not a universal HH:07
+boundary. Waiting for a wall-clock window would leave CI dependent on invocation
+time. Before changing the test, this narrow additional scope is authorized:
+
+- Only `tests/ha/test_init.py::test_hour_rollover_triggers_off_cycle_refresh` may
+  gain a controlled freezer fixture/time after its current-hour phase.
+- Preserve every original assertion, the two event times and production sources.
+  Do not skip, xfail, relax a count or alter scheduler behavior.
+- Commit this test fixture fix separately; preserve existing upstream PR heads.
+- Verify the original assertion AST is unchanged, run the actual test and full
+  HA suite, and independently show a removed hourly listener still causes an
+  assertion failure. Preserve the initial failed run and identical-base probes.
+- Repeat release/ZIP binding at the final revision. The integration payload and
+  builder must remain identical to the accepted implementation freeze.
