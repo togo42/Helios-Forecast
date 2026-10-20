@@ -235,11 +235,12 @@ async def test_no_soc_listener_registered_without_battery_soc_entity(hass, monke
     refresh_mock.assert_not_awaited()
 
 
-async def test_hour_rollover_triggers_off_cycle_refresh(hass, monkeypatch) -> None:
+async def test_hour_rollover_triggers_off_cycle_refresh(hass, monkeypatch, freezer) -> None:
     """The archive (past-forecast curve) only rebuilds once an hour, but that check only
     runs inside a refresh: without this listener, the just-elapsed hour could sit up to 30
     minutes past its own boundary still served unclamped.
     """
+    freezer.move_to("2026-10-20T12:30:00+00:00")
     entry = await _setup(hass, monkeypatch)
     coordinator = hass.data[DOMAIN][entry.entry_id]
 
