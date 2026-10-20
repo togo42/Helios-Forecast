@@ -29,8 +29,13 @@ fallback, global model configuration changes or unbounded retry.
    Use `python3 scripts/ai_review.py check --ref BASE --mode full --receipt PATH`
    (and meta where applicable) immediately before delivery. A successful CLI exit,
    prose approval or stale receipt never substitutes for a valid strict report.
-5. Record files, tests, internal review, remaining risks, base/target pins and
-   receipt paths in `docs/`. Provider artifacts stay ignored in `reviews/ai/`.
+5. Before the final review freeze, version scope, expectations, changed files,
+   tests, internal review, independent acceptance, remaining risks and known
+   base/target pins in `docs/`. After that freeze, record actual dynamic receipt
+   paths, hashes and final readbacks in tool-managed ignored `reviews/ai/`
+   receipts, an ignored `dist/` closeout JSON and chat. This is valid closeout;
+   do not create a source commit just to add final receipt paths. Any source
+   commit after review changes the policy snapshot and requires fresh reviews.
 
 Raw prompts, responses, transcript and receipt bindings are retained on failure.
 Missing/wrong ACKs, missing final turns, malformed JSON and empty responses fail
@@ -40,9 +45,10 @@ there is no automatic severity waiver or implicit acceptance.
 
 The optional local hook (`bash scripts/install_review_hook.sh --ref BASE`) checks every
 pushed SHA, including explicit refspecs; its local `aiReview.deliveryBase`
-configuration pins the complete delivery base and must be selected explicitly; review artifacts must cover that target
-and the entire pushed range. It rejects deletion and requires full plus meta for
-governance changes. Install only after reviews are ready. GitHub CI runs offline
+configuration pins the complete delivery base and must be selected explicitly.
+Review artifacts must cover that target and the entire pushed range. It rejects
+deletion and non-fast-forward updates, and requires full plus meta for governance
+changes. Install only after reviews are ready. GitHub CI runs offline
 regression tests; this is not server-side enforcement of provider reviews. Do not
 claim branch protection or provider-backed GitHub checks exist.
 

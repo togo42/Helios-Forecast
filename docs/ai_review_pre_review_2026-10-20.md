@@ -51,3 +51,18 @@ rules and empty-findings/conditions requirement for mergeable. This avoids relyi
 on an instruction appearing only in an early context chunk; parser strictness,
 ACK sequencing and no-retry behavior remain unchanged. The 13 offline CLI tests
 were rerun after this instruction change and passed.
+
+A final workflow pre-review corrected closeout circularity: versioned documents
+hold pre-freeze scope, expectations, tests and independent acceptance, while
+actual dynamic receipt paths/hashes and operational readbacks remain in ignored
+review receipts, ignored `dist/` closeout JSON and chat. This is explicitly valid
+closeout without a new source commit, preserving the strict policy-HEAD binding.
+No receipt-binding relaxation was introduced.
+
+The push gate additionally requires each nonzero remote tip to be an ancestor of
+the actual pushed target. A focused regression creates a published sibling
+containing a remote-only document, obtains full/meta receipts for the target,
+proves a normal forward update passes, then proves a rewrite deleting that remote
+history is rejected. This prevents an older review base from hiding a non-forward
+push. All 14 focused CLI tests passed in 13.40s; pinned Ruff lint/format, shell
+syntax and diff checks passed before committing.

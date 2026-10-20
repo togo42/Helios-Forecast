@@ -184,3 +184,22 @@ def test_transient_retry_and_protocol_failures_never_retry(review_repo):
         counter.unlink()
         cli(review_repo, mode=mode, ok=False)
         assert counter.read_text() == "1", mode
+
+
+def test_reviewed_target_cannot_rewrite_remote_history(review_repo):
+    repo, base, _ = review_repo
+    branch = git(repo, "branch", "--show-current")
+    target = git(repo, "rev-parse", "HEAD")
+    git(repo, "switch", "-c", "remote-history", base)
+    (repo / "docs/remote-only.md").write_text("Published remote change must not disappear")
+    git(repo, "add", ".")
+    git(repo, "commit", "-qm", "remote-only publication")
+    previous = git(repo, "rev-parse", "HEAD")
+    git(repo, "switch", branch)
+    assert git(repo, "rev-parse", "HEAD") == target
+    git(repo, "config", "aiReview.deliveryBase", base)
+    cli(review_repo)
+    cli(review_repo, extra=("--mode", "meta"))
+    cli(review_repo, "pre-push", input=f"refs/heads/topic {target} refs/heads/topic {base}\n")
+    result = cli(review_repo, "pre-push", input=f"refs/heads/topic {target} refs/heads/topic {previous}\n", ok=False)
+    assert "Non-fast-forward" in result.stderr

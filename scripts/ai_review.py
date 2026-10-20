@@ -237,6 +237,11 @@ def pre_push(repo):
         if target == "0" * 40:
             raise ValueError("Deletion requires separate manual authorization; hook rejects it")
         git(repo, "rev-parse", "--verify", target + "^{commit}")
+        if previous != "0" * 40:
+            try:
+                git(repo, "merge-base", "--is-ancestor", previous, target)
+            except subprocess.CalledProcessError as error:
+                raise ValueError("Non-fast-forward push would rewrite remote history") from error
         accepted = {}
         for path in (repo / "reviews/ai").glob("*/receipt.json"):
             try:

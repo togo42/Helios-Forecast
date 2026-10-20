@@ -141,3 +141,12 @@ Existing custom hooks are never overwritten. The hook checks every pushed SHA
 and full/meta coverage; GitHub CI only tests the helper offline. There is no
 server-side provider review enforcement. Reviews never grant publication or HA
 rollout permission. No global model configuration is changed.
+
+Freeze versioned scope, expectations, tests, internal review and independent
+acceptance documents before final provider calls. Actual dynamic receipt paths,
+hashes and final operational readbacks belong in tool-managed ignored
+`reviews/ai/` receipts, an ignored `dist/` closeout JSON and chat. This is the
+required valid closeout; no post-review source commit is needed to record those
+outputs. Any later source commit invalidates the current policy snapshot and
+requires fresh reviews. The push gate rejects non-fast-forward updates as well
+as deletions; a reviewed older-base diff cannot authorize rewriting remote history.
