@@ -5,16 +5,6 @@ date-based versioning scheme (`YEAR.MONTH.PATCH`).
 
 ---
 
-## Unreleased
-
-### Fixed
-
-- Backport the upstream benchmark description placeholders to the development
-  branch so translations pass Home Assistant validation. Keep the benchmark
-  optional and verify the options form supplies its results-page address.
-
----
-
 ## 2026.9.6
 
 The one line 2026.9.5 was missing. Everything that release fixed is in it and unchanged;
@@ -40,6 +30,12 @@ problem from here rather than from the website. That repair was published by the
 alone, while a refresh republishes the whole problem list from scratch: it was cleared at the
 next refresh and raised again at the next emission, once an hour. It is now restated on every
 refresh, so it stays up until the configuration is corrected.
+
+### Development backport (unreleased): benchmark translation validation
+
+Restore the benchmark description placeholders already present on main to the
+development branch. Translations pass Home Assistant validation, the benchmark
+remains optional, and the options form supplies the results-page address.
 
 ---
 
