@@ -69,3 +69,43 @@ def test_on_intervals_from_states_clips_and_closes() -> None:
     assert on_intervals_from_states(states, start, end) == [(0.0, 1 * _H), (2 * _H, 2.5 * _H), (3 * _H, 4 * _H)]
     assert on_intervals_from_states([], start, end) == []
     assert on_intervals_from_states([(-_H, "off")], start, end) == []
+
+
+def test_strict_mask_requires_full_explicit_off_history_and_preserves_legacy():
+    from custom_components.helios_forecast.curtailment import constraint_intervals_from_states, select_learning_buckets
+
+    buckets = [_bucket(i, 1) for i in range(4)]
+    intervals = constraint_intervals_from_states(
+        [(0, "off"), (_H, "unknown"), (2 * _H, "off"), (3.5 * _H, "on")], 0, 4 * _H
+    )
+    selected, quality = select_learning_buckets(buckets, intervals, strict=True)
+    assert selected == [buckets[0], buckets[2]]
+    assert quality == {"status": "partial", "strict": True, "counts": {"clean": 2, "unknown": 1, "constrained": 1}}
+    legacy, quality = select_learning_buckets(buckets, intervals)
+    assert legacy == buckets
+    assert quality["strict"] is False
+    assert select_learning_buckets(buckets, [], strict=True)[0] == []
+    point = constraint_intervals_from_states([(_H / 2, "off")], 0, _H)
+    assert select_learning_buckets([buckets[0]], point, strict=True)[0] == []
+
+
+def test_constraint_history_conflicts_and_gaps_fail_closed():
+    from custom_components.helios_forecast.curtailment import constraint_intervals_from_states, select_learning_buckets
+
+    bucket = [_bucket(0, 1)]
+    for states in [
+        [],
+        [(0, "unavailable")],
+        [(0, "off"), (0, "on")],
+        [(_H, "off"), (0, "off")],
+        [(float("nan"), "off")],
+    ]:
+        intervals = constraint_intervals_from_states(states, 0, _H)
+        selected, quality = select_learning_buckets(bucket, intervals, strict=True)
+        assert selected == []
+        assert quality["status"] == "unknown"
+    intervals = constraint_intervals_from_states([(-_H, "off")], 0, _H)
+    assert select_learning_buckets(bucket, intervals, strict=True)[0] == bucket
+    # Even a short on overlap is excluded in strict mode; legacy half-hour rule stays unchanged.
+    intervals = constraint_intervals_from_states([(0, "off"), (_H - 1, "on")], 0, _H)
+    assert select_learning_buckets(bucket, intervals, strict=True)[0] == []

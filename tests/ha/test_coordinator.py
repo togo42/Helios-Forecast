@@ -754,3 +754,120 @@ async def test_refresh_binds_actual_inputs_and_fallback_provenance(hass, monkeyp
     assert coordinator.data.provenance["weather"]["received_at"] == received.isoformat()
     assert coordinator.data.provenance["weather"]["content_sha256"] == first["weather"]["content_sha256"]
     assert coordinator.data.provenance["weather"]["retrieval"] == "stale"
+
+
+async def test_strict_unknown_mask_excludes_both_learning_inputs(hass, monkeypatch):
+    from custom_components.helios_forecast.solar.residual import ProductionBucket
+
+    now = dt_util.utcnow()
+    buckets = [
+        ProductionBucket(
+            (now - timedelta(hours=2)).timestamp() * 1000, (now - timedelta(hours=1)).timestamp() * 1000, 1
+        )
+    ]
+    entry = _entry(hass, {"production_entity": "sensor.pv", "strict_learning_quality": True})
+    coordinator = HeliosForecastCoordinator(hass, entry)
+    monkeypatch.setattr(coordinator, "_fetch_change_buckets", AsyncMock(return_value=buckets))
+    monkeypatch.setattr(coordinator_mod, "fetch_weather", AsyncMock(return_value=make_weather_series(now)))
+    residual_inputs, analog_inputs = [], []
+    original_map, original_library = coordinator_mod.build_sky_residual_map, coordinator_mod.build_library
+
+    def residual(inp):
+        residual_inputs.append(inp.production)
+        return original_map(inp)
+
+    def library(production, *args):
+        analog_inputs.append(production)
+        return original_library(production, *args)
+
+    monkeypatch.setattr(coordinator_mod, "build_sky_residual_map", residual)
+    monkeypatch.setattr(coordinator_mod, "build_library", library)
+    await coordinator.async_refresh()
+    assert coordinator.last_update_success and coordinator.data.points
+    assert coordinator._production_buckets == []
+    assert residual_inputs == []  # no residual fit when mask has no eligible hours
+    assert analog_inputs == [[]]
+    assert coordinator.data.provenance["learning"]["strict"] is True
+    assert coordinator.data.provenance["learning"]["constraint_quality"] == "unknown"
+    assert coordinator.data.provenance["learning"]["quality_counts"]["unknown"] == 1
+    assert coordinator.data.provenance["learning"]["input_count"] == 0
+
+
+async def test_strict_signal_full_hour_and_unreadable_history(hass, monkeypatch):
+    from types import SimpleNamespace
+    from custom_components.helios_forecast.solar.residual import ProductionBucket
+
+    start = dt_util.utcnow().replace(minute=0, second=0, microsecond=0) - timedelta(hours=2)
+    buckets = [ProductionBucket(start.timestamp() * 1000, (start + timedelta(hours=1)).timestamp() * 1000, 1)]
+    coordinator = HeliosForecastCoordinator(hass, _entry(hass))
+    data = {"strict_learning_quality": True, "curtailment_entity": "binary_sensor.constraint"}
+    monkeypatch.setattr(
+        coordinator_mod.history,
+        "state_changes_during_period",
+        lambda *args, **kwargs: {"binary_sensor.constraint": [SimpleNamespace(last_updated=start, state="off")]},
+    )
+    assert await coordinator._flag_curtailed(data, buckets, start, start + timedelta(hours=1)) == buckets
+    assert coordinator._learning_quality["status"] == "known"
+
+    def fail(*args, **kwargs):
+        raise RuntimeError("history unreadable")
+
+    monkeypatch.setattr(coordinator_mod.history, "state_changes_during_period", fail)
+    assert await coordinator._flag_curtailed(data, buckets, start, start + timedelta(hours=1)) == []
+    assert coordinator._learning_quality["status"] == "unknown"
+    legacy = {**data, "strict_learning_quality": False}
+    assert await coordinator._flag_curtailed(legacy, buckets, start, start + timedelta(hours=1)) == buckets
+
+
+async def test_strict_clean_selection_is_shared_by_residual_and_analog(hass, monkeypatch):
+    from types import SimpleNamespace
+    from custom_components.helios_forecast.solar.residual import ProductionBucket
+
+    now = dt_util.utcnow()
+    start = now.replace(minute=0, second=0, microsecond=0) - timedelta(hours=3)
+    buckets = [
+        ProductionBucket(
+            (start + timedelta(hours=i)).timestamp() * 1000, (start + timedelta(hours=i + 1)).timestamp() * 1000, 1
+        )
+        for i in range(2)
+    ]
+    entry = _entry(
+        hass,
+        {
+            "production_entity": "sensor.pv",
+            "strict_learning_quality": True,
+            "curtailment_entity": "binary_sensor.constraint",
+        },
+    )
+    coordinator = HeliosForecastCoordinator(hass, entry)
+    monkeypatch.setattr(coordinator, "_fetch_change_buckets", AsyncMock(return_value=buckets))
+    monkeypatch.setattr(coordinator_mod, "fetch_weather", AsyncMock(return_value=make_weather_series(now)))
+    monkeypatch.setattr(
+        coordinator_mod.history,
+        "state_changes_during_period",
+        lambda *args, **kwargs: {
+            "binary_sensor.constraint": [
+                SimpleNamespace(last_updated=start, state="off"),
+                SimpleNamespace(last_updated=start + timedelta(hours=1), state="unknown"),
+            ]
+        },
+    )
+    residual_inputs, analog_inputs = [], []
+
+    def residual(inp):
+        residual_inputs.append(inp.production)
+        return None
+
+    original_library = coordinator_mod.build_library
+
+    def library(production, *args):
+        analog_inputs.append(production)
+        return original_library(production, *args)
+
+    monkeypatch.setattr(coordinator_mod, "build_sky_residual_map", residual)
+    monkeypatch.setattr(coordinator_mod, "build_library", library)
+    await coordinator.async_refresh()
+    assert coordinator.last_update_success
+    assert residual_inputs == [[buckets[0]]]
+    assert analog_inputs == residual_inputs
+    assert coordinator.data.provenance["learning"]["input_count"] == 1

@@ -23,12 +23,14 @@
           "battery_max_discharge_kw": "Max. ontlaadvermogen batterij (kW, optioneel)",
           "battery_min_soc": "Batterijreserve, minimale laadtoestand (%, standaard 10)",
           "battery_efficiency": "Retourrendement batterij (%, standaard 90)",
-          "curtailment_entity": "Beperkingssignaal (binaire sensor, input boolean of schakelaar, optioneel)"
+          "curtailment_entity": "Beperkingssignaal (binaire sensor, input boolean of schakelaar, optioneel)",
+          "strict_learning_quality": "Learn only fully observed unconstrained hours"
         },
         "data_description": {
           "production_entity": "Een cumulatieve energiesensor (kWh), bijv. de totale productie van uw omvormer of energiemeter. Een vermogenssensor (W) werkt niet: die heeft geen langetermijn-somstatistieken, dus het leren en de betrouwbaarheidsindex blijven uit.",
           "battery_soc_entity": "Vul de capaciteit en deze sensor in om de laadtoestandsprojectie in te schakelen. Het huisverbruik komt uit je Energie-dashboard, hier is geen sensor nodig.",
-          "curtailment_entity": "Aan zolang uw omvormer wordt afgeknepen om een reden die de lucht niet verklaart: volle accu, nul-injectie, netlimiet. De uren die het markeert worden niet als lage productie geleerd. Zonder dit signaal wordt een volle accu nog steeds herkend via de laadtoestandsensor en de omvormerlimiet."
+          "curtailment_entity": "Aan zolang uw omvormer wordt afgeknepen om een reden die de lucht niet verklaart: volle accu, nul-injectie, netlimiet. De uren die het markeert worden niet als lage productie geleerd. Zonder dit signaal wordt een volle accu nog steeds herkend via de laadtoestandsensor en de omvormerlimiet.",
+          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
         }
       },
       "line": {
@@ -73,12 +75,14 @@
           "battery_max_discharge_kw": "Max. ontlaadvermogen batterij (kW, optioneel)",
           "battery_min_soc": "Batterijreserve, minimale laadtoestand (%, standaard 10)",
           "battery_efficiency": "Retourrendement batterij (%, standaard 90)",
-          "curtailment_entity": "Beperkingssignaal (binaire sensor, input boolean of schakelaar, optioneel)"
+          "curtailment_entity": "Beperkingssignaal (binaire sensor, input boolean of schakelaar, optioneel)",
+          "strict_learning_quality": "Learn only fully observed unconstrained hours"
         },
         "data_description": {
           "production_entity": "Een cumulatieve energiesensor (kWh), bijv. de totale productie van uw omvormer of energiemeter. Een vermogenssensor (W) werkt niet: die heeft geen langetermijn-somstatistieken, dus het leren en de betrouwbaarheidsindex blijven uit.",
           "battery_soc_entity": "Vul de capaciteit en deze sensor in om de laadtoestandsprojectie in te schakelen. Het huisverbruik komt uit je Energie-dashboard, hier is geen sensor nodig.",
-          "curtailment_entity": "Aan zolang uw omvormer wordt afgeknepen om een reden die de lucht niet verklaart: volle accu, nul-injectie, netlimiet. De uren die het markeert worden niet als lage productie geleerd. Zonder dit signaal wordt een volle accu nog steeds herkend via de laadtoestandsensor en de omvormerlimiet."
+          "curtailment_entity": "Aan zolang uw omvormer wordt afgeknepen om een reden die de lucht niet verklaart: volle accu, nul-injectie, netlimiet. De uren die het markeert worden niet als lage productie geleerd. Zonder dit signaal wordt een volle accu nog steeds herkend via de laadtoestandsensor en de omvormerlimiet.",
+          "strict_learning_quality": "Optional conservative mask. Learn only full hours covered by explicit off history of the curtailment signal. Missing or unavailable history is excluded. Off by default."
         }
       },
       "lines": {

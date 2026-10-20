@@ -309,3 +309,20 @@ async def test_the_benchmark_step_joins_and_leaves_without_touching_anything_els
     await hass.config_entries.options.async_configure(result["flow_id"], {CONF_BENCHMARK_ENABLED: False})
     assert entry.data.get(CONF_BENCHMARK_ENABLED) is False
     assert entry.data[CONF_INVERTER_MAX_KW] == 5.0
+
+
+async def test_strict_learning_quality_is_explicitly_configurable(recorder_mock, hass, enable_custom_integrations):
+    entry = MockConfigEntry(domain=DOMAIN, data={CONF_ARRAYS: [_LINE_A]})
+    entry.add_to_hass(hass)
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {"next_step_id": "settings"})
+    await hass.config_entries.options.async_configure(
+        result["flow_id"], {"strict_learning_quality": True, "curtailment_entity": "binary_sensor.constraints"}
+    )
+    await hass.async_block_till_done()
+    assert {**entry.data, **entry.options}["strict_learning_quality"] is True
+    result = await hass.config_entries.options.async_init(entry.entry_id)
+    result = await hass.config_entries.options.async_configure(result["flow_id"], {"next_step_id": "settings"})
+    await hass.config_entries.options.async_configure(result["flow_id"], {"strict_learning_quality": False})
+    await hass.async_block_till_done()
+    assert {**entry.data, **entry.options}["strict_learning_quality"] is False
