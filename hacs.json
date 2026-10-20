@@ -1,4 +1,7 @@
 {
-  "name": "Helios Forecast",
-  "homeassistant": "2025.11.0"
+  "name": "Helios Forecast (togo42 fork)",
+  "homeassistant": "2025.11.0",
+  "hide_default_branch": true,
+  "zip_release": true,
+  "filename": "helios_forecast.zip"
 }

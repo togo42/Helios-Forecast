@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+      - fork/stable
+      - 'release/**'
       - 'develop-**'
       - '[0-9]*'
   pull_request:
@@ -37,8 +39,8 @@ jobs:
         with:
           python-version: "3.13"
       - run: pip install ruff==0.15.20 mypy==1.19.1
-      - run: ruff check custom_components tests
-      - run: ruff format --check custom_components tests
+      - run: ruff check custom_components tests scripts
+      - run: ruff format --check custom_components tests scripts
       - run: mypy custom_components/helios_forecast
 
   import-check:

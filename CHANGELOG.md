@@ -5,6 +5,18 @@ date-based versioning scheme (`YEAR.MONTH.PATCH`).
 
 ---
 
+## 2026.10.0rc1 — togo42 fork candidate (test-only)
+
+- Package the frozen combined fork baseline with versioned fork metadata and a
+  reproducible offline HACS ZIP/verification CLI and separate SHA-256 receipt.
+- Preserve runtime behavior, domain, entities, config entries, learned state and
+  defaults. Existing DST/refresh/cache/provenance/strict-learning improvements
+  remain as reviewed in the combined baseline; no newer upstream develop merge.
+- Extend existing read-only CI to fork stable/release branches and manual runs.
+- No productive HA or empirical winter/P10/recovery acceptance; no source switch.
+  See [candidate notes](docs/fork_release_2026.10.0rc1.md) and
+  [workflow and rollback](docs/fork_workflow.md).
+
 ## Unreleased
 
 ### Fixed

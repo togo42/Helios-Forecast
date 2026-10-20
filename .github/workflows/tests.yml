@@ -4,9 +4,12 @@ on:
   push:
     branches:
       - main
+      - fork/stable
+      - 'release/**'
       - 'develop-**'
       - '[0-9]*'
   pull_request:
+  workflow_dispatch:
 
 permissions:
   contents: read
