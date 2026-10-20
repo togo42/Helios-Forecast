@@ -53,8 +53,10 @@ def consumption_sources(prefs: Optional[dict]) -> ConsumptionSources:
             _add(signed, src.get("stat_energy_from"), +1)  # discharge, out of the battery
             _add(signed, src.get("stat_energy_to"), -1)  # charge, into the battery
         elif source_type == "grid":
-            # A grid source carries its meters in two required lists and never at the top level
-            # (homeassistant/components/energy/data.py, GRID_SOURCE_SCHEMA).
+            # Unified grid meters (upstream PR #86) and legacy flow lists may coexist
+            # during migration. The statistic-id mapping counts a repeated meter once.
+            _add(signed, src.get("stat_energy_from"), +1)
+            _add(signed, src.get("stat_energy_to"), -1)
             for flow in src.get("flow_from") or []:
                 _add(signed, flow.get("stat_energy_from"), +1)  # import
             for flow in src.get("flow_to") or []:
@@ -114,13 +116,19 @@ def build_consumption_profile(
 
     All ids share the recorder's hourly grid, so their buckets sum per hour by start. A kWh over
     one hour is that many mean watts; net consumption is floored at 0 (a derivation that dips
-    slightly negative is meter noise, never real). None when no history backs any source.
+    slightly negative is meter noise, never real). None when any configured source has no
+    history: a missing meter must not silently become a zero contribution.
 
     An hour only counts when every sparse source (see SPARSE_COVERAGE_RATIO) has a bucket for it:
     a battery whose discharge meter reports a quarter of the time would otherwise carry the night
     load a quarter of the time and the profile would learn a house that barely consumes after dark.
     """
     coverage = source_coverage(sources, buckets_by_id)
+    # A configured meter with no history is missing evidence, never a zero-energy
+    # meter. A partial sum would teach the battery projection the wrong house load.
+    # Unconfigured optional sources are absent from ``signed`` and do not block it.
+    if any(share == 0 for share in coverage.values()):
+        return None
     best = max(coverage.values(), default=0.0)
     sparse = [sid for sid, share in coverage.items() if 0 < share < SPARSE_COVERAGE_RATIO * best]
     required: Optional[set] = None

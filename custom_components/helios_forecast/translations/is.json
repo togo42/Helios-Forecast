@@ -269,6 +269,10 @@
       "title": "Engin framleiðsla skráð í {days} daga",
       "description": "{entity}, framleiðsluskynjari {entry}, hefur ekki hækkað í {days} daga. Snjór eða bilun getur skýrt það; ef sellurnar framleiða hefur skynjarinn hætt að skila og lærdómurinn sveltur."
     },
+    "consumption_source_missing": {
+      "title": "Engin orkusaga fyrir {source}",
+      "description": "Uppsprettan {source} á orkuyfirlitinu hefur enga orkusögu á klukkustund. Rafhlöðuspáin er ekki tiltæk fyrr en allar stilltar uppsprettur hafa gögn. Athugaðu tölfræðina og sögu hennar í Recorder."
+    },
     "consumption_source_sparse": {
       "title": "Notkunaruppsprettan {source} skilar með hléum",
       "description": "Í orkumælaborðinu hefur {source} gögn fyrir {pct} % af klukkustundunum sem besta uppsprettan nær yfir ({best} %). Notkunarsniðið er aðeins byggt á klukkustundunum sem hún nær yfir, svo það helst rétt en hvílir á minni sögu. Áreiðanlegri skynjari fyrir þetta flæði skerpir framreikning rafhlöðunnar."

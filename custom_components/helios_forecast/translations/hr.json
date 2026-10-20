@@ -269,6 +269,10 @@
       "title": "Nema zabilježene proizvodnje već {days} dana",
       "description": "{entity}, senzor proizvodnje {entry}, nije porastao već {days} dana. Snijeg ili kvar to mogu objasniti; ako paneli proizvode, senzor je prestao prijavljivati i učenje gladuje."
     },
+    "consumption_source_missing": {
+      "title": "Nema povijesti energije za {source}",
+      "description": "Izvor {source} na energetskoj nadzornoj ploči nema satnu povijest energije. Prognoza baterije nije dostupna dok svi konfigurirani izvori nemaju podatke. Provjerite statistiku i njezinu povijest u Recorderu."
+    },
     "consumption_source_sparse": {
       "title": "Izvor potrošnje {source} prijavljuje s prekidima",
       "description": "Na nadzornoj ploči Energija {source} ima podatke za {pct} % sati koje pokriva najbolji izvor ({best} %). Profil potrošnje gradi se samo od sati koje pokriva, pa ostaje točan, ali počiva na manje povijesti. Pouzdaniji senzor za taj tok izoštrava projekciju baterije."

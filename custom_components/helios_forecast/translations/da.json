@@ -269,6 +269,10 @@
       "title": "Ingen produktion registreret i {days} dage",
       "description": "{entity}, produktionssensoren for {entry}, er ikke steget i {days} dage. Sne eller et nedbrud kan forklare det; producerer panelerne, er sensoren holdt op med at rapportere, og læringen sulter."
     },
+    "consumption_source_missing": {
+      "title": "Ingen energihistorik for {source}",
+      "description": "Kilden {source} i energioversigten har ingen energihistorik pr. time. Batteriprognosen er utilgængelig, indtil alle konfigurerede kilder har data. Kontrollér statistikken og dens historik i Recorder."
+    },
     "consumption_source_sparse": {
       "title": "Forbrugskilden {source} rapporterer kun af og til",
       "description": "I energidashboardet har {source} data for {pct} % af de timer, den bedste kilde dækker ({best} %). Forbrugsprofilen bygges kun af de timer, den dækker, så den forbliver rigtig, men hviler på mindre historik. En mere pålidelig sensor for den strøm gør batterifremskrivningen skarpere."

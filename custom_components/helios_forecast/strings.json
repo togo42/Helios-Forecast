@@ -269,6 +269,10 @@
       "title": "No production recorded for {days} days",
       "description": "{entity}, the production sensor of {entry}, has not increased for {days} days. Snow or an outage can explain it; if the panels do produce, the sensor stopped reporting and the learning is starving."
     },
+    "consumption_source_missing": {
+      "title": "No energy history for consumption source {source}",
+      "description": "The Energy dashboard source {source} has no hourly energy history. The battery projection stays unavailable until every configured source has data. Check the selected statistic and its Recorder history. Optional meters that are not configured do not require data."
+    },
     "consumption_source_sparse": {
       "title": "Consumption source {source} reports intermittently",
       "description": "In the Energy dashboard, {source} has data for {pct}% of the hours the best source covers ({best}%). The consumption profile is built only from the hours it does cover, so it stays right but rests on less history. A more reliable sensor for that flow makes the battery projection sharper."

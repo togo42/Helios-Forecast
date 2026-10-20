@@ -68,6 +68,12 @@
 > Revision (2026-10-20): clarify elapsed-time intervals on clock-change days
 > (section 2). Field names, units, output surfaces and the card API are unchanged.
 
+> Fork RC2 revision (2026-10-20): final point forecasts and published bands retain
+> configured hardware bounds after analog learning. Energy consumption reads both
+> unified and legacy grid meters; a configured source without history is missing
+> evidence and disables the incomplete SoC projection with a repair. Reused weather
+> retains the original HTTP input receipts. Field names and default options remain.
+
 The integration owns one **config entry per installation**, holding one or more
 **panel lines** (a group of co-oriented panels each). Every surface below is scoped
 to that entry: one device, one entity set and one detail series per entry, summing
@@ -218,9 +224,24 @@ Both take an optional `config_entry_id` (needed only with several installations)
 The SoC projection **predicts, it never commands**: it exposes the curve and leaves
 the charge decision to the user's own automation.
 
+The consumption derivation reads grid imports/exports from both unified top-level
+`stat_energy_from` / `stat_energy_to` fields and legacy flow lists, deduplicated by
+statistic ID. The unified-format correction follows upstream PR #86. A configured
+source with no historical buckets is missing evidence, even when other sources
+have history: the projection is suppressed and a missing-source repair names it.
+Actual zero-energy buckets remain valid observations. The coverage attribute
+describes the current source read, including when no profile can be built.
+
 All PV values are residual-corrected. A raw (pre-correction) variant is not exposed
 as entities to keep the set clean; the raw curve stays available to the card via
 the detail series in section 3.
+
+Final learned point watts and nonnull P10/P90 values are bounded by configured
+hardware after analog refinement. The combined upper bound is the minimum of the
+entry inverter cap and the sum of producing lines' inverter caps; an uncapped
+producing line contributes infinity to that sum. Nameplate power and current raw
+watts are not hardware caps. Missing bands stay null. This is an aggregate output
+bound, not a new allocation of learned power between lines or a quantile calibration.
 
 **Intervals.** The sub-hourly forecast advances in real elapsed time. A local
 clock-change day therefore has 92 or 100 quarter-hour intervals instead of 96;

@@ -82,10 +82,20 @@ async def test_deleting_the_entry_takes_its_archived_series_with_it(hass, monkey
         "homeassistant.components.recorder.get_instance",
         lambda _hass: type("I", (), {"async_clear_statistics": staticmethod(cleared.extend)})(),
     )
+    removed_stores: list[str] = []
+
+    async def remove_store(store):
+        removed_stores.append(store.key)
+
+    monkeypatch.setattr("homeassistant.helpers.storage.Store.async_remove", remove_store)
 
     await async_remove_entry(hass, entry)
 
     assert set(cleared) == {external_statistic_id(entry.entry_id, key) for key, _u, _n in ARCHIVED_SERIES}
+    assert set(removed_stores) == {
+        f"{DOMAIN}.{entry.entry_id}.{name}" for name in ("trend", "day_ahead", "weather_history")
+    }
+    assert len(removed_stores) == 3
 
 
 async def test_a_settings_key_no_version_reads_is_cleared_from_the_entry(hass, monkeypatch) -> None:

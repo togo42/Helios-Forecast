@@ -269,6 +269,10 @@
       "title": "Ražošana nav reģistrēta {days} dienas",
       "description": "{entity}, {entry} ražošanas sensors, nav pieaudzis {days} dienas. Sniegs vai bojājums to var izskaidrot; ja paneļi ražo, sensors ir pārstājis ziņot un mācības badojas."
     },
+    "consumption_source_missing": {
+      "title": "Nav {source} enerģijas vēstures",
+      "description": "Enerģijas paneļa avotam {source} nav enerģijas vēstures pa stundām. Akumulatora prognoze nav pieejama, kamēr visiem konfigurētajiem avotiem nav datu. Pārbaudiet statistiku un tās vēsturi Recorder sistēmā."
+    },
     "consumption_source_sparse": {
       "title": "Patēriņa avots {source} ziņo ar pārtraukumiem",
       "description": "Enerģijas panelī {source} ir dati par {pct} % stundu, kuras aptver labākais avots ({best} %). Patēriņa profils tiek veidots tikai no stundām, kuras tas aptver, tāpēc paliek pareizs, bet balstās uz mazāku vēsturi. Uzticamāks šīs plūsmas sensors padara akumulatora projekciju precīzāku."

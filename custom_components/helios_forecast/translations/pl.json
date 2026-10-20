@@ -269,6 +269,10 @@
       "title": "Brak zarejestrowanej produkcji od {days} dni",
       "description": "{entity}, czujnik produkcji {entry}, nie wzrósł od {days} dni. Śnieg lub awaria mogą to tłumaczyć; jeśli panele produkują, czujnik przestał raportować, a uczenie głoduje."
     },
+    "consumption_source_missing": {
+      "title": "Brak historii energii dla {source}",
+      "description": "Źródło {source} w panelu energii nie ma godzinowej historii energii. Prognoza baterii jest niedostępna, dopóki wszystkie skonfigurowane źródła nie mają danych. Sprawdź statystykę i jej historię w Recorderze."
+    },
     "consumption_source_sparse": {
       "title": "Źródło zużycia {source} raportuje z przerwami",
       "description": "W panelu Energia {source} ma dane dla {pct}% godzin, które pokrywa najlepsze źródło ({best}%). Profil zużycia jest budowany tylko z godzin, które pokrywa, więc pozostaje poprawny, ale opiera się na mniejszej historii. Bardziej niezawodny czujnik dla tego przepływu wyostrza projekcję baterii."

@@ -1,8 +1,8 @@
 """DataUpdateCoordinator: fetch Open-Meteo + recorder history and build the forecast.
 
 Runs the model on a timer, holding the assembled points and the derived summary.
-One combined Open-Meteo fetch per refresh (60 past days for the learning, 7 future
-days for the forecast), regardless of how many panel orientations are configured;
+Fresh recent Open-Meteo inputs per refresh, with bounded reuse of the 60-day
+learning history, regardless of how many panel orientations are configured;
 the model splits that single weather series across orientations itself. The learned
 residual map is built from the recorder's own production / SoC history.
 """
@@ -67,11 +67,12 @@ from .curtailment import (
 )
 from .battery import BatterySocPoint, project_battery_soc
 from .benchmark import DEFAULT_ENDPOINT, async_upload, build_payload
-from .consumption import ConsumptionProfile, build_consumption_profile, consumption_sources
+from .consumption import ConsumptionProfile, build_consumption_profile, consumption_sources, source_coverage
 from .trend import TodayTrend, TrendReference, compute_trend, should_capture
 from .const import DOMAIN
-from .forecast import ForecastPoint, build_forecast_series
+from .forecast import ForecastPoint, build_forecast_series, hardware_power_limit_w
 from .openmeteo import WeatherSeries, fetch_weather
+from .weather_history import WeatherHistory
 from .provenance import build_provenance
 from .reliability import SKILL_WINDOW_DAYS, Reliability, compute_reliability
 from .statistics import (
@@ -151,6 +152,9 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
         # Last weather window fetched, kept so the statistics archive can be written both at the
         # end of a refresh and once at setup (so the first backfill lands immediately).
         self.weather_series: Optional[WeatherSeries] = None
+        self._weather_history = WeatherHistory(history_days=LEARN_DAYS, forecast_days=FORECAST_DAYS + 1)
+        self._weather_store: Store = Store(hass, 1, f"{DOMAIN}.{entry.entry_id}.weather_history")
+        self._weather_history_loaded = False
         # Predicted-production statistic rows from the most recent refresh, keyed by series key.
         # Written to HA statistics by write_forecast_statistics, both at the end of a refresh and
         # once at setup (first backfill).
@@ -174,6 +178,7 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
         self._weather_fetched_at: Optional[datetime] = None
         # Home consumption profile for the SoC projection; rebuilt hourly by _consumption_profile_for.
         self._consumption_profile: Optional[ConsumptionProfile] = None
+        self._consumption_coverage: Dict[str, float] = {}
         self._last_consumption_hour: Optional[datetime] = None
         # Production history (recorder change buckets) from the most recent refresh, kept so the
         # reliability index can reuse it without a second recorder fetch.
@@ -214,8 +219,8 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
 
     @property
     def consumption_coverage(self) -> Dict[str, float]:
-        """Per-source coverage of the consumption profile in use, empty when there is none."""
-        return dict(self._consumption_profile.coverage) if self._consumption_profile is not None else {}
+        """Current per-source evidence, including missing sources when no profile is usable."""
+        return dict(self._consumption_coverage)
 
     # --- check-up -------------------------------------------------------------------------------
 
@@ -275,20 +280,33 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
         # every issue they raised and create it again at the end of this same refresh.
         self._publish_problems(problems, retire=False)
 
-        # One combined window: 60 past days feed the learning, the future days the forecast. Open-Meteo
+        # Settled history is reused; fresh recent hours and forecasts are mandatory. Open-Meteo
         # answers whole UTC days while the horizon below runs on local midnights, so west of Greenwich
         # the last local day ends after the final UTC hour of a FORECAST_DAYS window; one day of slack
         # covers every offset, and build_forecast_series stops at the weather either way.
         reused_after_failure = False
         try:
-            weather = await fetch_weather(session, lat, lon, past_days=LEARN_DAYS, forecast_days=FORECAST_DAYS + 1)
+            fetched_now = dt_util.utcnow()
+            if not self._weather_history_loaded:
+                self._weather_history_loaded = True
+                try:
+                    stored = await self._weather_store.async_load()
+                    if stored is not None:
+                        self._weather_history.restore(stored, lat, lon, now=fetched_now)
+                except Exception:  # noqa: BLE001 - an optional cache never prevents real weather
+                    _LOGGER.warning("Could not load weather history; requesting a fresh backfill", exc_info=True)
+            weather = await self._weather_history.fetch(session, lat, lon, now=fetched_now, fetcher=fetch_weather)
             if weather is not None:
                 self._weather_fetched_at = weather.received_at or dt_util.utcnow()
+                try:
+                    await self._weather_store.async_save(self._weather_history.dump(fetched_now))
+                except Exception:  # noqa: BLE001 - retain usable weather if optional persistence fails
+                    _LOGGER.warning("Could not save weather history", exc_info=True)
             # A transient empty response should not blank the forecast: reuse the last good fetch so
             # the model still runs, for as long as the service stays silent. What that series does not
             # gain is knowledge of the hours since, which is why the archive is bounded by the fetch
             # instant above; a first-ever empty response (no prior fetch) still fails.
-            elif self.weather_series is not None:
+            elif self.weather_series is not None and self._weather_history.matches(lat, lon):
                 _LOGGER.warning("Open-Meteo returned no weather data; reusing the last successful fetch")
                 weather = self.weather_series
                 reused_after_failure = True
@@ -330,12 +348,15 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
         analog_library = await self.hass.async_add_executor_job(
             build_library, self._production_buckets, weather, lat, lon, layout, cap
         )
-        points = await self.hass.async_add_executor_job(enrich_points, points, analog_library, weather, lat, lon, now)
+        final_cap = hardware_power_limit_w(layout, cap)
+        points = await self.hass.async_add_executor_job(
+            enrich_points, points, analog_library, weather, lat, lon, now, final_cap
+        )
         # The live series keeps its elapsed points raw on purpose (what the forecast said at the time), but the
         # card draws them next to the archive's clamped hours, where a raw point hugs the nameplate ceiling for
         # up to an hour before the archive catches up. Serve the card a clamped copy of that stretch instead.
         self.elapsed_points = await self.hass.async_add_executor_job(
-            enrich_archive_points, [p for p in points if p.t < now], analog_library, weather, lat, lon
+            enrich_archive_points, [p for p in points if p.t < now], analog_library, weather, lat, lon, final_cap
         )
 
         # The sensors read the same curve the card draws: clamped up to now, raw after it. "Now" always
@@ -377,8 +398,7 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
 
         trend = await self._today_trend(data, now, summary)
         battery_soc = await self._project_battery_soc(data, points, now)
-        if self._consumption_profile is not None:
-            problems += check_consumption_coverage(self._consumption_profile.coverage)
+        problems += check_consumption_coverage(self._consumption_coverage)
         # The collector's verdict on this installation is re-stated on every refresh, not only on the
         # upload that brought it: the publish below replaces the whole list, so a verdict added by the
         # upload alone would be wiped by the next refresh half an hour later.
@@ -504,6 +524,8 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
 
         sources = consumption_sources(prefs)
         if not sources.signed:
+            self._consumption_profile = None
+            self._consumption_coverage = {}
             _LOGGER.warning(
                 "Helios battery projection: the Energy dashboard has no configured sources, so home "
                 "consumption cannot be derived and the SoC projection stays off"
@@ -517,19 +539,24 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
             return_exceptions=True,
         )
         buckets_by_id: Dict[str, List[ProductionBucket]] = {}
+        fetch_failed = False
         for stat_id, result in zip(ids, fetched):
             if isinstance(result, BaseException):
+                if isinstance(result, asyncio.CancelledError):
+                    raise result
+                fetch_failed = True
                 _LOGGER.warning(
-                    "Helios battery projection: recorder fetch failed for %s, that source is skipped: %s",
+                    "Helios battery projection: recorder fetch failed for %s, retaining the last profile: %s",
                     stat_id,
                     result,
                 )
                 continue
             buckets_by_id[stat_id] = result
 
-        profile = build_consumption_profile(sources, buckets_by_id, dt_util.DEFAULT_TIME_ZONE)
-        if profile is not None:
-            self._consumption_profile = profile
+        if fetch_failed:
+            return self._consumption_profile
+        self._consumption_coverage = source_coverage(sources, buckets_by_id)
+        self._consumption_profile = build_consumption_profile(sources, buckets_by_id, dt_util.DEFAULT_TIME_ZONE)
         return self._consumption_profile
 
     async def _maybe_upload_benchmark(self, data, lat, lon, points, reliability, now_utc) -> None:
@@ -718,7 +745,7 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
             step_minutes=60,
             residual_map=residual_map,
         )
-        return enrich_archive_points(points, analog_library, weather, lat, lon)
+        return enrich_archive_points(points, analog_library, weather, lat, lon, hardware_power_limit_w(layout, cap))
 
     @callback
     def write_forecast_statistics(self) -> None:

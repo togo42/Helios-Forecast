@@ -269,6 +269,10 @@
       "title": "Tootmist pole salvestatud {days} päeva",
       "description": "{entity}, {entry} tootmisandur, ei ole {days} päeva kasvanud. Lumi või rike võivad seda seletada; kui paneelid toodavad, on andur lõpetanud teatamise ja õppimine nälgib."
     },
+    "consumption_source_missing": {
+      "title": "Allikal {source} puudub energiaajalugu",
+      "description": "Energia töölaua allikal {source} puudub tunnipõhine energiaajalugu. Aku prognoos pole saadaval, kuni kõigil seadistatud allikatel on andmed. Kontrollige statistikat ja selle ajalugu Recorderis."
+    },
     "consumption_source_sparse": {
       "title": "Tarbimisallikas {source} teatab katkendlikult",
       "description": "Energia armatuurlaual on allikal {source} andmed {pct}% tundide kohta, mida katab parim allikas ({best}%). Tarbimisprofiil ehitatakse ainult tundidest, mida see katab, seega jääb see õigeks, kuid toetub väiksemale ajaloole. Usaldusväärsem andur selle voo jaoks muudab aku projektsiooni täpsemaks."

@@ -269,6 +269,10 @@
       "title": "{days} napja nincs rögzített termelés",
       "description": "{entity}, a(z) {entry} termelésérzékelője, {days} napja nem nőtt. Hó vagy meghibásodás magyarázhatja; ha a panelek termelnek, az érzékelő nem jelent többé, és a tanulás kiéhezik."
     },
+    "consumption_source_missing": {
+      "title": "Hiányzik a(z) {source} energiaelőzménye",
+      "description": "Az energiafelület {source} forrásának nincsenek óránkénti energiaadatai. Az akkumulátor előrejelzése nem érhető el, amíg minden beállított forrásnak nincs adata. Ellenőrizze a statisztikát és annak Recorder-előzményeit."
+    },
     "consumption_source_sparse": {
       "title": "A(z) {source} fogyasztási forrás szakaszosan jelent",
       "description": "Az Energia irányítópulton a(z) {source} az órák {pct}%-ára rendelkezik adattal, amelyeket a legjobb forrás lefed ({best}%). A fogyasztási profil csak az általa lefedett órákból épül, így helyes marad, de kevesebb előzményre támaszkodik. Egy megbízhatóbb érzékelő ehhez az áramláshoz élesebbé teszi az akkumulátor-vetítést."

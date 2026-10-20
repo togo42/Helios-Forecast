@@ -269,6 +269,10 @@
       "title": "Žiadna výroba zaznamenaná už {days} dní",
       "description": "{entity}, senzor výroby {entry}, sa nezvýšil už {days} dní. Sneh alebo výpadok to môžu vysvetliť; ak panely vyrábajú, senzor prestal hlásiť a učenie hladuje."
     },
+    "consumption_source_missing": {
+      "title": "Chýba história energie pre {source}",
+      "description": "Zdroj {source} na energetickom paneli nemá hodinovú históriu energie. Predpoveď batérie nie je dostupná, kým všetky nakonfigurované zdroje nemajú údaje. Skontrolujte štatistiku a jej históriu v Recorderi."
+    },
     "consumption_source_sparse": {
       "title": "Zdroj spotreby {source} hlási prerušovane",
       "description": "V paneli Energia má {source} údaje pre {pct} % hodín, ktoré pokrýva najlepší zdroj ({best} %). Profil spotreby sa stavia len z hodín, ktoré pokrýva, takže zostáva správny, ale opiera sa o menej histórie. Spoľahlivejší senzor pre tento tok spresní projekciu batérie."

@@ -1,11 +1,12 @@
-> **togo42 fork — candidate 2026.10.0rc1 (test-only).** This fork of
+> **togo42 fork — candidate 2026.10.0rc2.** This fork of
 > [ReikanYsora/Helios-Forecast](https://github.com/ReikanYsora/Helios-Forecast)
 > prepares independent versioned packages and separate upstream contributions.
-> It is not tested in productive Home Assistant and grants no winter, P10 or
-> recovery acceptance. Use a fixed fork prerelease after its gates; do not install
+> RC2 repairs grid-source compatibility, final hardware limits, weather-history
+> reuse and offline replay. It grants no winter, calibrated P10 or recovery
+> acceptance. Use a fixed fork prerelease after its gates; do not install
 > the mirrored main/development branch. HACS identifies the fork separately;
 > it retains the same integration domain and cannot coexist as a second copy.
-> [Candidate notes](docs/fork_release_2026.10.0rc1.md) ·
+> [Candidate notes](docs/rc2_release_2026-10-20.md) ·
 > [Build, contribution, migration and rollback](docs/fork_workflow.md).
 >
 > The upstream README and attribution below are retained as upstream documentation;

@@ -14,6 +14,9 @@ adapters and control policies belong outside this integration.
 - `fork/stable`: curated fork line; the reviewed combined behavioral baseline is
   `ce2838fe79cf1fda306ad853e8f102b91b2cc364`.
 - `release/2026.10.0rc1`: first candidate, prepared from that baseline.
+- `release/2026.10.0rc2`: correctness/replay delivery from published
+  `fork/stable` base `569074a42399a2e5e954b01da8ce34240fa1341e`; follow the
+  [RC2 scope and gates](rc2_release_2026-10-20.md).
 
 Upstream develop was observed at `c5fff9d479605c38b2d72031cbf82b283ef4814d`;
 later upstream changes are excluded. The separate DST/refresh contributions and
@@ -52,9 +55,9 @@ publish assets, change branches, contact GitHub or install anything:
 
 ```sh
 python3 scripts/build_fork_release.py build --expected-rev PIN \
-  --version 2026.10.0rc1 --tag v2026.10.0rc1 --output dist/rc1
+  --version 2026.10.0rc2 --tag v2026.10.0rc2 --output dist/rc2
 python3 scripts/build_fork_release.py verify --expected-rev PIN \
-  --version 2026.10.0rc1 --tag v2026.10.0rc1 --output dist/rc1
+  --version 2026.10.0rc2 --tag v2026.10.0rc2 --output dist/rc2
 ```
 
 The pinned revision must equal HEAD and the repository must have no tracked or
@@ -100,7 +103,7 @@ authorized HA rollout gate, not a prerequisite requiring productive writes now.
 Run the complete pure and Home Assistant suites, pinned Ruff lint/format and mypy,
 independent behavioral acceptance and final external review against the frozen
 baseline. Record exact pins and hashes after gates. Publication is a separate
-coordinator step: create the fixed `v2026.10.0rc1` GitHub prerelease with both
+coordinator step: create the fixed `v2026.10.0rc2` GitHub prerelease with both
 verified files, do not mark it latest/stable, and verify GitHub checks on that
 exact commit. No publication workflow or write permission was added. A release or
 merge does not grant productive rollout permission.
@@ -115,6 +118,13 @@ learned files. Only one source may own the existing `helios_forecast` directory.
 Replace code only after separate approval and leave optional strict learning,
 benchmark and battery settings disabled unless already explicitly chosen. Preserve
 all existing options and disabled entity settings; this candidate changes no defaults.
+
+For RC2, the user separately authorized updating the existing fork installation
+after passing tests/reviews and exact-commit GitHub checks. The full backup and
+fresh before/after verification still apply. No integration removal or source
+replacement is needed when HACS already owns the fork. Select exactly
+`v2026.10.0rc2`, verify installed bytes before restart, and retain the recorded rc1
+code for a narrow rollback. This authorization does not enable ESS control.
 
 On a separately authorized rollback, stop/restart Core through the supported HA
 procedure, restore the recorded previous integration code and HACS source/version,

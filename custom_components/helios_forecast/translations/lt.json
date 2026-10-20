@@ -269,6 +269,10 @@
       "title": "Gamyba neužfiksuota {days} dienas",
       "description": "{entity}, {entry} gamybos jutiklis, nedidėjo {days} dienas. Sniegas arba gedimas gali tai paaiškinti; jei moduliai gamina, jutiklis nustojo pranešti ir mokymasis badauja."
     },
+    "consumption_source_missing": {
+      "title": "Nėra {source} energijos istorijos",
+      "description": "Energijos skydelio šaltinis {source} neturi valandinės energijos istorijos. Akumuliatoriaus prognozė nepasiekiama, kol visi sukonfigūruoti šaltiniai neturi duomenų. Patikrinkite statistiką ir jos istoriją Recorder sistemoje."
+    },
     "consumption_source_sparse": {
       "title": "Vartojimo šaltinis {source} praneša su pertrūkiais",
       "description": "Energijos skydelyje {source} turi duomenis {pct} % valandų, kurias apima geriausias šaltinis ({best} %). Vartojimo profilis sudaromas tik iš valandų, kurias jis apima, todėl lieka teisingas, bet remiasi mažesne istorija. Patikimesnis šio srauto jutiklis patikslina baterijos projekciją."

@@ -63,7 +63,8 @@ async def test_update_data_success_populates_everything(hass, monkeypatch) -> No
     assert coordinator.last_update_success
     assert coordinator.data is not None
     assert coordinator.data.points
-    assert coordinator.weather_series is weather
+    assert coordinator.weather_series.times == weather.times
+    assert coordinator.weather_series.cloud == weather.cloud
 
 
 async def test_the_day_ahead_prediction_is_written_down_once_and_survives_a_restart(hass, monkeypatch, freezer) -> None:
@@ -167,12 +168,13 @@ async def test_transient_empty_response_reuses_last_good_weather(hass, monkeypat
 
     await coordinator.async_refresh()
     assert coordinator.last_update_success
+    last_good = coordinator.weather_series
 
     with caplog.at_level(logging.WARNING, logger=coordinator_mod._LOGGER.name):
         await coordinator.async_refresh()
 
     assert coordinator.last_update_success
-    assert coordinator.weather_series is weather
+    assert coordinator.weather_series is last_good
     assert "reusing the last successful fetch" in caplog.text
 
 
@@ -332,11 +334,13 @@ async def test_consumption_profile_throttle_engages_even_when_profile_stays_none
     manager_mock.assert_awaited_once()
 
 
-async def test_consumption_profile_source_fetch_failure_logs_and_uses_remaining_sources(
+async def test_consumption_profile_source_fetch_failure_logs_and_keeps_previous_profile(
     hass, monkeypatch, caplog
 ) -> None:
     entry = _entry(hass)
     coordinator = HeliosForecastCoordinator(hass, entry)
+    previous = ConsumptionProfile(slot_w={}, hour_w={}, overall_w=500, samples=1)
+    coordinator._consumption_profile = previous
     now = dt_util.now().replace(minute=5, second=0, microsecond=0)
 
     class _Manager:
@@ -367,7 +371,7 @@ async def test_consumption_profile_source_fetch_failure_logs_and_uses_remaining_
     with caplog.at_level(logging.WARNING, logger=coordinator_mod._LOGGER.name):
         result = await coordinator._consumption_profile_for(now)
 
-    assert result is not None
+    assert result is previous
     assert "sensor.solar_production" in caplog.text
 
 
@@ -587,9 +591,12 @@ async def test_the_weather_mark_follows_the_data_not_the_clock(hass, monkeypatch
     keep = sum(1 for t in behind.times if t <= last)
     for attr in ("times", "cloud", "shortwave", "direct", "diffuse", "temp", "wind", "snow", "cloud_spread"):
         del getattr(behind, attr)[keep:]
-    monkeypatch.setattr(coordinator_mod, "fetch_weather", AsyncMock(return_value=behind))
-
-    await coordinator.async_refresh()
+    # Exercise archive cutoff directly: a history-only response cannot satisfy
+    # the RC2 coordinator's fresh forecast requirement at cold startup.
+    coordinator.weather_series = behind
+    coordinator._weather_fetched_at = now
+    monkeypatch.setattr(coordinator_mod, "async_add_external_statistics", lambda *_args: None)
+    coordinator.write_weather_statistics(now)
 
     assert coordinator._last_weather_stat_hour == last - timedelta(hours=coordinator_mod.ARCHIVE_RETRY_HOURS)
 
@@ -748,7 +755,7 @@ async def test_refresh_binds_actual_inputs_and_fallback_provenance(hass, monkeyp
     first = coordinator.data.provenance
     assert first["schema_version"] == "helios.forecast.v1"
     assert first["weather"]["received_at"] == received.isoformat()
-    assert first["weather"]["retrieval"] == "cache"
+    assert first["weather"]["retrieval"] == "assembled"
     assert first["learning"]["input_count"] == len(coordinator._production_buckets)
     await coordinator.async_refresh()
     assert coordinator.data.provenance["weather"]["received_at"] == received.isoformat()

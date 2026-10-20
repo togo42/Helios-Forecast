@@ -246,3 +246,18 @@ def test_sparse_consumption_source_is_named_with_its_share() -> None:
     assert problems[0].placeholders == {"source": "sensor.bat_out", "pct": "24", "best": "100"}
     assert check_consumption_coverage({"a": 1.0, "b": 0.6}) == []
     assert check_consumption_coverage({}) == []
+
+
+def test_missing_configured_consumption_sources_are_named_even_without_a_profile() -> None:
+    for coverage in ({"sensor.import": 0.0}, {"sensor.import": 1.0, "sensor.export": 0.0}):
+        problems = check_consumption_coverage(coverage)
+        missing_id = "sensor.import" if len(coverage) == 1 else "sensor.export"
+        assert len(problems) == 1
+        assert problems[0].key == "consumption_source_missing"
+        assert problems[0].severity == WARNING
+        assert problems[0].placeholders == {"source": missing_id}
+
+
+def test_unconfigured_optional_consumption_sources_have_no_issue() -> None:
+    assert check_consumption_coverage({}) == []
+    assert check_consumption_coverage({"sensor.import": 1.0}) == []

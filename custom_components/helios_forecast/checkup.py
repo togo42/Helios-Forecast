@@ -360,15 +360,17 @@ def check_production_history(
 
 
 def check_consumption_coverage(coverage: Dict[str, float]) -> List[Problem]:
-    """A source far behind the best-covered one dilutes the profile: named, with its share."""
+    """Name configured sources with absent or sparse consumption evidence."""
     problems: List[Problem] = []
     if not coverage:
         return problems
     best = max(coverage.values())
-    if best <= 0:
-        return problems
     for stat_id, share in sorted(coverage.items()):
-        if share < SPARSE_COVERAGE_RATIO * best:
+        if share <= 0:
+            problems.append(
+                Problem("consumption_source_missing", WARNING, {"source": stat_id}, stat_id.replace(".", "_"))
+            )
+        elif share < SPARSE_COVERAGE_RATIO * best:
             problems.append(
                 Problem(
                     "consumption_source_sparse",

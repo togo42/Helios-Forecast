@@ -269,6 +269,10 @@
       "title": "Tuotantoa ei ole kirjattu {days} päivään",
       "description": "Kohteen {entry} tuotantoanturi {entity} ei ole kasvanut {days} päivään. Lumi tai vika voi selittää sen; jos paneelit tuottavat, anturi on lakannut raportoimasta ja oppiminen näkee nälkää."
     },
+    "consumption_source_missing": {
+      "title": "Lähteen {source} energiahistoria puuttuu",
+      "description": "Energianäkymän lähteellä {source} ei ole tuntikohtaista energiahistoriaa. Akkuennuste ei ole käytettävissä, ennen kuin kaikista määritetyistä lähteistä on tietoja. Tarkista tilasto ja sen Recorder-historia."
+    },
     "consumption_source_sparse": {
       "title": "Kulutuslähde {source} raportoi katkonaisesti",
       "description": "Energiakojelaudassa lähteellä {source} on tietoa {pct} %:lle tunneista, jotka paras lähde kattaa ({best} %). Kulutusprofiili rakennetaan vain sen kattamista tunneista, joten se pysyy oikeana mutta nojaa pienempään historiaan. Luotettavampi anturi tälle virralle tarkentaa akkuennustetta."

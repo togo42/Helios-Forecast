@@ -5,6 +5,26 @@ date-based versioning scheme (`YEAR.MONTH.PATCH`).
 
 ---
 
+## 2026.10.0rc2 — togo42 fork candidate
+
+- Read both unified and legacy Energy-dashboard grid meters, deduplicated with
+  their import/export signs. Credit upstream PR #86 for the unified-format fix.
+  A configured consumption meter without history now raises a specific repair
+  and suppresses an incomplete SoC projection; measured zero remains valid.
+- Enforce configured entry and combined panel-line inverter limits after analog
+  refinement for point forecasts and existing uncertainty bands. Keep the
+  actual/physical analog-ratio definition and null-band semantics unchanged.
+- Reuse compatible settled weather history across short forecast refreshes,
+  retaining original input receipts and bounded recent-hour/backfill repair.
+  See [weather expectations](WEATHER_API.md) for startup and failure semantics.
+- Repair offline replay's model inputs and integration-owned weather IDs, require
+  explicit installation configuration, and include measured daylight zeros in
+  matched-hour scoring. Archived-weather replay evaluates the learning component;
+  it is not an original-forecast or calibrated hourly-band benchmark.
+- Preserve configuration entries, entity IDs, disabled settings, learning options,
+  services and Recorder ownership. Existing rc1 tags, assets and PR heads remain
+  immutable. See [RC2 scope and gates](docs/rc2_release_2026-10-20.md).
+
 ## 2026.10.0rc1 — togo42 fork candidate (test-only)
 
 - Package the frozen combined fork baseline with versioned fork metadata and a

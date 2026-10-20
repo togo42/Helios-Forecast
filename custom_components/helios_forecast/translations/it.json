@@ -269,6 +269,10 @@
       "title": "Nessuna produzione registrata da {days} giorni",
       "description": "{entity}, il sensore di produzione di {entry}, non aumenta da {days} giorni. Neve o un guasto possono spiegarlo; se i pannelli producono, il sensore ha smesso di riportare e l'apprendimento resta a secco."
     },
+    "consumption_source_missing": {
+      "title": "Nessuno storico energetico per {source}",
+      "description": "La fonte {source} della dashboard Energia non dispone di uno storico energetico orario. La previsione della batteria non è disponibile finché tutte le fonti configurate non hanno dati. Controllare la statistica e il relativo storico in Recorder."
+    },
     "consumption_source_sparse": {
       "title": "La fonte di consumo {source} riporta a intermittenza",
       "description": "Nel pannello Energia, {source} ha dati per il {pct} % delle ore coperte dalla fonte migliore ({best} %). Il profilo di consumo è costruito solo con le ore che copre, quindi resta corretto ma poggia su meno storico. Un sensore più affidabile per quel flusso rende più precisa la proiezione della batteria."

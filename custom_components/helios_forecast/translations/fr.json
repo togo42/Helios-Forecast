@@ -269,6 +269,10 @@
       "title": "Aucune production enregistrée depuis {days} jours",
       "description": "{entity}, le capteur de production de {entry}, n'a pas augmenté depuis {days} jours. La neige ou une panne peuvent l'expliquer ; si les panneaux produisent, le capteur a cessé de rapporter et l'apprentissage est à sec."
     },
+    "consumption_source_missing": {
+      "title": "Aucun historique énergétique pour {source}",
+      "description": "La source {source} du tableau de bord Énergie ne dispose d’aucun historique énergétique horaire. La prévision de batterie reste indisponible tant que toutes les sources configurées ne fournissent pas de données. Vérifiez la statistique et son historique dans Recorder."
+    },
     "consumption_source_sparse": {
       "title": "La source de consommation {source} rapporte par intermittence",
       "description": "Dans le tableau de bord Énergie, {source} a des données pour {pct} % des heures que couvre la meilleure source ({best} %). Le profil de consommation n'est construit qu'avec les heures qu'elle couvre, il reste donc juste mais repose sur moins d'historique. Un capteur plus fiable pour ce flux affine la projection de la batterie."

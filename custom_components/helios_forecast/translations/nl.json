@@ -269,6 +269,10 @@
       "title": "Geen productie geregistreerd sinds {days} dagen",
       "description": "{entity}, de productiesensor van {entry}, is al {days} dagen niet gestegen. Sneeuw of een storing kan het verklaren; produceren de panelen wel, dan is de sensor gestopt met rapporteren en droogt het leren op."
     },
+    "consumption_source_missing": {
+      "title": "Geen energiegeschiedenis voor {source}",
+      "description": "Bron {source} in het energiedashboard heeft geen energiegeschiedenis per uur. De batterijvoorspelling is niet beschikbaar totdat alle ingestelde bronnen gegevens hebben. Controleer de statistiek en de geschiedenis in Recorder."
+    },
     "consumption_source_sparse": {
       "title": "Verbruiksbron {source} rapporteert met tussenpozen",
       "description": "In het energiedashboard heeft {source} gegevens voor {pct}% van de uren die de beste bron dekt ({best}%). Het verbruiksprofiel wordt alleen gebouwd uit de uren die hij dekt, dus het blijft juist maar steunt op minder geschiedenis. Een betrouwbaardere sensor voor die stroom maakt de accuprojectie scherper."

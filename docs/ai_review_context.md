@@ -24,6 +24,19 @@ Review must not claim empirical HA acceptance from pure tests, hashes or CI.
 Report concrete file-specific findings and conditions using the exact final JSON
 schema in the prompt. An uncertain or conditional review blocks delivery.
 
+RC2 has three explicitly scoped committed delivery targets described in
+docs/rc2_scope_2026-10-20.md, docs/rc2_release_2026-10-20.md and
+docs/rc2_upstream_2026-10-20.md. The fork RC2 delivery base is published
+569074a42399a2e5e954b01da8ce34240fa1341e and includes the complete correctness,
+weather, replay and release change. Explicit upstream --target reviews use frozen
+develop base c5fff9d479605c38b2d72031cbf82b283ef4814d: hardware target
+036c1a64455391e48d6e3a33f777e1d11a9e1d6a contains only the hardware fix; replay
+target aed361a2d387ada8a80c13dd8fd78aa68350575d additionally contains replay.
+Those upstream snapshots deliberately retain upstream metadata and exclude fork
+weather/provenance/release/governance changes; assess the complete named target
+range and all supplied target runtime files. This does not waive any finding,
+condition, full/meta requirement, test or receipt check for any target.
+
 The retrospective rc1 review compares target
 `a8ba20b2257cc7a747542fc45c08528273f0f664` to upstream ancestor
 `da8fa3e7218aaedf47e50518c21df74b9aef70e0`: DST #1, refresh #2, benchmark

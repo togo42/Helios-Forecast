@@ -269,6 +269,10 @@
       "title": "Ni zabeležene proizvodnje že {days} dni",
       "description": "{entity}, senzor proizvodnje {entry}, se ni povečal že {days} dni. Sneg ali izpad to lahko pojasnita; če paneli proizvajajo, je senzor nehal poročati in učenje strada."
     },
+    "consumption_source_missing": {
+      "title": "Ni zgodovine energije za {source}",
+      "description": "Vir {source} na energijski nadzorni plošči nima urne zgodovine energije. Napoved baterije ni na voljo, dokler vsi nastavljeni viri nimajo podatkov. Preverite statistiko in njeno zgodovino v Recorderju."
+    },
     "consumption_source_sparse": {
       "title": "Vir porabe {source} poroča s prekinitvami",
       "description": "V nadzorni plošči Energija ima {source} podatke za {pct} % ur, ki jih pokriva najboljši vir ({best} %). Profil porabe se gradi samo iz ur, ki jih pokriva, zato ostaja pravilen, a sloni na manj zgodovine. Zanesljivejši senzor za ta tok izostri projekcijo baterije."

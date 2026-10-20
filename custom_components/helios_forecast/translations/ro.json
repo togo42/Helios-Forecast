@@ -269,6 +269,10 @@
       "title": "Nicio producție înregistrată de {days} zile",
       "description": "{entity}, senzorul de producție al {entry}, nu a crescut de {days} zile. Zăpada sau o pană o pot explica; dacă panourile produc, senzorul a încetat să raporteze și învățarea rămâne fără date."
     },
+    "consumption_source_missing": {
+      "title": "Lipsește istoricul energiei pentru {source}",
+      "description": "Sursa {source} din panoul de energie nu are istoric orar al energiei. Prognoza bateriei nu este disponibilă până când toate sursele configurate au date. Verificați statistica și istoricul acesteia în Recorder."
+    },
     "consumption_source_sparse": {
       "title": "Sursa de consum {source} raportează intermitent",
       "description": "În panoul Energie, {source} are date pentru {pct}% din orele pe care le acoperă cea mai bună sursă ({best}%). Profilul de consum este construit doar din orele pe care le acoperă, deci rămâne corect, dar se sprijină pe mai puțin istoric. Un senzor mai fiabil pentru acel flux face proiecția bateriei mai precisă."

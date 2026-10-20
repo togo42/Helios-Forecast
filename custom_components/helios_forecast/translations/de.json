@@ -269,6 +269,10 @@
       "title": "Seit {days} Tagen keine Erzeugung aufgezeichnet",
       "description": "{entity}, der Erzeugungssensor von {entry}, ist seit {days} Tagen nicht gestiegen. Schnee oder ein Ausfall können das erklären; erzeugen die Module, hat der Sensor aufgehört zu melden und das Lernen hungert."
     },
+    "consumption_source_missing": {
+      "title": "Keine Energiehistorie für {source}",
+      "description": "Für die Quelle {source} im Energie-Dashboard fehlt die stündliche Energiehistorie. Die Batterieprognose bleibt nicht verfügbar, bis jede konfigurierte Quelle Daten liefert. Prüfen Sie die Statistik und deren Recorder-Historie."
+    },
     "consumption_source_sparse": {
       "title": "Die Verbrauchsquelle {source} meldet nur zeitweise",
       "description": "Im Energie-Dashboard hat {source} Daten für {pct} % der Stunden, die die beste Quelle abdeckt ({best} %). Das Verbrauchsprofil wird nur aus den Stunden gebaut, die sie abdeckt, bleibt also richtig, stützt sich aber auf weniger Historie. Ein zuverlässigerer Sensor für diesen Fluss macht die Batterieprojektion schärfer."

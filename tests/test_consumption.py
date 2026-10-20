@@ -59,6 +59,50 @@ def test_sources_grid_flow_lists() -> None:
     assert consumption_sources(prefs).signed == {"sensor.import": 1, "sensor.export": -1}
 
 
+def test_sources_unified_grid_and_legacy_meters_are_counted_once() -> None:
+    prefs = {
+        "energy_sources": [
+            {
+                "type": "grid",
+                "stat_energy_from": "sensor.import",
+                "stat_energy_to": "sensor.export",
+                "flow_from": [{"stat_energy_from": "sensor.import"}, {"stat_energy_from": "sensor.second_import"}],
+                "flow_to": [{"stat_energy_to": "sensor.export"}],
+            }
+        ]
+    }
+    sources = consumption_sources(prefs)
+    assert sources.signed == {"sensor.import": 1, "sensor.export": -1, "sensor.second_import": 1}
+    hour = datetime(2026, 1, 5, 10, tzinfo=_UTC)
+    profile = build_consumption_profile(
+        sources,
+        {
+            "sensor.import": [_bucket(hour, 3.0)],
+            "sensor.export": [_bucket(hour, 1.0)],
+            "sensor.second_import": [_bucket(hour, 0.5)],
+        },
+        _UTC,
+    )
+    assert profile is not None
+    assert profile.overall_w == 2500.0
+
+
+def test_sources_unified_grid_without_legacy_lists() -> None:
+    prefs = {
+        "energy_sources": [{"type": "grid", "stat_energy_from": "sensor.import", "stat_energy_to": "sensor.export"}]
+    }
+    assert consumption_sources(prefs).signed == {"sensor.import": 1, "sensor.export": -1}
+
+
+def test_optional_unconfigured_export_and_battery_do_not_require_history() -> None:
+    sources = consumption_sources({"energy_sources": [{"type": "grid", "stat_energy_from": "sensor.import"}]})
+    hour = datetime(2026, 1, 5, 10, tzinfo=_UTC)
+    profile = build_consumption_profile(sources, {"sensor.import": [_bucket(hour, 0.5)]}, _UTC)
+    assert profile is not None
+    assert profile.coverage == {"sensor.import": 1.0}
+    assert profile.overall_w == 500.0
+
+
 def test_sources_missing_pieces_drop_out() -> None:
     assert consumption_sources(None).signed == {}
     assert consumption_sources({}).signed == {}
@@ -104,14 +148,24 @@ def test_profile_averages_same_slot_and_falls_back() -> None:
 
 
 def test_profile_partial_source_missing_from_buckets() -> None:
-    # "b" is signed but never fetched (e.g. a failed history call): it must drop out silently
-    # rather than crash, leaving the profile built from whatever sources did come back.
+    # A configured missing export meter cannot be assumed to have exported zero.
     monday_10 = datetime(2026, 1, 5, 10, tzinfo=_UTC)
     sources = ConsumptionSources(signed={"a": 1, "b": -1})
     buckets = {"a": [_bucket(monday_10, 3.0)]}
     profile = build_consumption_profile(sources, buckets, _UTC)
+    assert profile is None
+
+
+def test_profile_explicit_zero_meter_is_real_evidence() -> None:
+    hour = datetime(2026, 1, 5, 10, tzinfo=_UTC)
+    profile = build_consumption_profile(
+        ConsumptionSources(signed={"import": 1, "export": -1}),
+        {"import": [_bucket(hour, 3.0)], "export": [_bucket(hour, 0.0)]},
+        _UTC,
+    )
     assert profile is not None
-    assert abs(profile.at(monday_10) - 3000.0) < 1e-9
+    assert profile.overall_w == 3000.0
+    assert profile.coverage == {"import": 1.0, "export": 1.0}
 
 
 def test_profile_none_without_history() -> None:

@@ -204,7 +204,7 @@ async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry) -> None:
     get_instance(hass).async_clear_statistics(
         [external_statistic_id(entry.entry_id, key) for key, _unit, _name in ARCHIVED_SERIES]
     )
-    for name in ("trend", "day_ahead"):
+    for name in ("trend", "day_ahead", "weather_history"):
         await Store(hass, 1, f"{DOMAIN}.{entry.entry_id}.{name}").async_remove()
 
 
