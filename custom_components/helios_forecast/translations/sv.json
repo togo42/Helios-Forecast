@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Anläggning",
           "description": "Vilken Helios Forecast-installation som ska läsas. Valfritt när endast en är konfigurerad."
+        },
+        "include_provenance": {
+          "name": "Include provenance",
+          "description": "Include versioned computation and input metadata. Default response is unchanged."
         }
       }
     },

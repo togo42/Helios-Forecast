@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Инсталация",
           "description": "Коя инсталация Helios Forecast да се прочете. Незадължително, когато е конфигурирана само една."
+        },
+        "include_provenance": {
+          "name": "Include provenance",
+          "description": "Include versioned computation and input metadata. Default response is unchanged."
         }
       }
     },

@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Laitos",
           "description": "Mikä Helios Forecast -asennus luetaan. Valinnainen, kun määritettynä on vain yksi."
+        },
+        "include_provenance": {
+          "name": "Include provenance",
+          "description": "Include versioned computation and input metadata. Default response is unchanged."
         }
       }
     },

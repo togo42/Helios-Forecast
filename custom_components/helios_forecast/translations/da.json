@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Anlæg",
           "description": "Hvilken Helios Forecast-installation der skal læses. Valgfrit, når kun én er konfigureret."
+        },
+        "include_provenance": {
+          "name": "Include provenance",
+          "description": "Include versioned computation and input metadata. Default response is unchanged."
         }
       }
     },

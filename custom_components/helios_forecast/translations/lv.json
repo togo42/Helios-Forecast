@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Iekārta",
           "description": "Kuru Helios Forecast instalāciju nolasīt. Nav obligāti, ja konfigurēta tikai viena."
+        },
+        "include_provenance": {
+          "name": "Include provenance",
+          "description": "Include versioned computation and input metadata. Default response is unchanged."
         }
       }
     },

@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Instalación",
           "description": "Qué instalación de Helios Forecast leer. Opcional cuando solo hay una configurada."
+        },
+        "include_provenance": {
+          "name": "Include provenance",
+          "description": "Include versioned computation and input metadata. Default response is unchanged."
         }
       }
     },

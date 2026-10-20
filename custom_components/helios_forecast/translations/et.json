@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Paigaldis",
           "description": "Millist Helios Forecasti paigaldist lugeda. Valikuline, kui seadistatud on ainult üks."
+        },
+        "include_provenance": {
+          "name": "Include provenance",
+          "description": "Include versioned computation and input metadata. Default response is unchanged."
         }
       }
     },

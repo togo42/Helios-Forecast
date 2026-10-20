@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Rendszer",
           "description": "Melyik Helios Forecast telepítést olvassa be. Nem kötelező, ha csak egy van beállítva."
+        },
+        "include_provenance": {
+          "name": "Include provenance",
+          "description": "Include versioned computation and input metadata. Default response is unchanged."
         }
       }
     },
