@@ -960,3 +960,9 @@ cancellations are not cached. See WEATHER_API.md. Existing output shapes remain.
 Optional provenance (unreleased): `helios_forecast.get_forecast` accepts
 `include_provenance: true` to include reproducibility metadata. Default response
 and all point values remain unchanged. See PROVENANCE_API.md.
+
+
+Strict learning quality (unreleased, opt-in): installation settings expose
+`strict_learning_quality`, default false. When true, only full-hour explicit
+off coverage from the configured curtailment signal is learned. Unknown history
+is excluded from both residual and analog learning. See TRAINING_API.md.

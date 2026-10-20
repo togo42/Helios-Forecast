@@ -23,12 +23,14 @@
           "battery_max_discharge_kw": "Maks. afladningseffekt for batteri (kW, valgfrit)",
           "battery_min_soc": "Batterireserve, minimal ladetilstand (%, standard 10)",
           "battery_efficiency": "Batteriets rundtursvirkningsgrad (%, standard 90)",
-          "curtailment_entity": "Begrænsningssignal (binær sensor, input boolean eller kontakt, valgfri)"
+          "curtailment_entity": "Begrænsningssignal (binær sensor, input boolean eller kontakt, valgfri)",
+          "strict_learning_quality": "Streng læringskvalitet"
         },
         "data_description": {
           "production_entity": "En kumulativ energisensor (kWh), f.eks. din inverters eller elmålers samlede produktion. En effektsensor (W) virker ikke: den har ingen langtidsstatistik for summen, så læringen og pålidelighedsindekset ville forblive slået fra.",
           "battery_soc_entity": "Udfyld kapaciteten og denne sensor for at slå projektionen af ladetilstand til. Husforbruget hentes fra dit Energi-dashboard, så der kræves ingen sensor her.",
-          "curtailment_entity": "Tændt, så længe din inverter holdes tilbage af en grund, himlen ikke forklarer: fuldt batteri, nul-eksport, netgrænse. De markerede timer læres ikke som lav produktion. Uden det opdages et fuldt batteri stadig ud fra ladetilstandssensoren og inverterloftet."
+          "curtailment_entity": "Tændt, så længe din inverter holdes tilbage af en grund, himlen ikke forklarer: fuldt batteri, nul-eksport, netgrænse. De markerede timer læres ikke som lav produktion. Uden det opdages et fuldt batteri stadig ud fra ladetilstandssensoren og inverterloftet.",
+          "strict_learning_quality": "Lær kun af hele timer med et udtrykkeligt slukket begrænsningssignal. Manglende historik udelukkes. Slået fra som standard."
         }
       },
       "line": {
@@ -73,12 +75,14 @@
           "battery_max_discharge_kw": "Maks. afladningseffekt for batteri (kW, valgfrit)",
           "battery_min_soc": "Batterireserve, minimal ladetilstand (%, standard 10)",
           "battery_efficiency": "Batteriets rundtursvirkningsgrad (%, standard 90)",
-          "curtailment_entity": "Begrænsningssignal (binær sensor, input boolean eller kontakt, valgfri)"
+          "curtailment_entity": "Begrænsningssignal (binær sensor, input boolean eller kontakt, valgfri)",
+          "strict_learning_quality": "Streng læringskvalitet"
         },
         "data_description": {
           "production_entity": "En kumulativ energisensor (kWh), f.eks. din inverters eller elmålers samlede produktion. En effektsensor (W) virker ikke: den har ingen langtidsstatistik for summen, så læringen og pålidelighedsindekset ville forblive slået fra.",
           "battery_soc_entity": "Udfyld kapaciteten og denne sensor for at slå projektionen af ladetilstand til. Husforbruget hentes fra dit Energi-dashboard, så der kræves ingen sensor her.",
-          "curtailment_entity": "Tændt, så længe din inverter holdes tilbage af en grund, himlen ikke forklarer: fuldt batteri, nul-eksport, netgrænse. De markerede timer læres ikke som lav produktion. Uden det opdages et fuldt batteri stadig ud fra ladetilstandssensoren og inverterloftet."
+          "curtailment_entity": "Tændt, så længe din inverter holdes tilbage af en grund, himlen ikke forklarer: fuldt batteri, nul-eksport, netgrænse. De markerede timer læres ikke som lav produktion. Uden det opdages et fuldt batteri stadig ud fra ladetilstandssensoren og inverterloftet.",
+          "strict_learning_quality": "Lær kun af hele timer med et udtrykkeligt slukket begrænsningssignal. Manglende historik udelukkes. Slået fra som standard."
         }
       },
       "lines": {

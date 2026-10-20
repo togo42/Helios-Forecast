@@ -23,12 +23,14 @@
           "battery_max_discharge_kw": "Макс. снага пражњења батерије (kW, опционо)",
           "battery_min_soc": "Резерва батерије, минимално стање напуњености (%, подразумевано 10)",
           "battery_efficiency": "Ефикасност пуног циклуса батерије (%, подразумевано 90)",
-          "curtailment_entity": "Сигнал ограничења (бинарни сензор, input boolean или прекидач, опционо)"
+          "curtailment_entity": "Сигнал ограничења (бинарни сензор, input boolean или прекидач, опционо)",
+          "strict_learning_quality": "Строг квалитет учења"
         },
         "data_description": {
           "production_entity": "Kumulativni senzor energije (kWh), npr. ukupna proizvodnja pretvarača ili brojila. Senzor snage (W) neće raditi: nema dugoročnu statistiku zbira, pa bi učenje i indeks pouzdanosti ostali isključeni.",
           "battery_soc_entity": "Попуните капацитет и овај сензор да бисте укључили пројекцију стања напуњености. Потрошња куће се узима са ваше Енергетске контролне табле, сензор овде није потребан.",
-          "curtailment_entity": "Uključen dok je pretvarač ograničen iz razloga koji nebo ne objašnjava: puna baterija, nulti izvoz, ograničenje mreže. Označeni sati se ne uče kao niska proizvodnja. Bez njega se puna baterija i dalje prepoznaje iz senzora stanja napunjenosti i granice pretvarača."
+          "curtailment_entity": "Uključen dok je pretvarač ograničen iz razloga koji nebo ne objašnjava: puna baterija, nulti izvoz, ograničenje mreže. Označeni sati se ne uče kao niska proizvodnja. Bez njega se puna baterija i dalje prepoznaje iz senzora stanja napunjenosti i granice pretvarača.",
+          "strict_learning_quality": "Учи само из целих сати са изричито искљученим сигналом ограничења. Недостајућа историја се искључује. Подразумевано искључено."
         }
       },
       "line": {
@@ -73,12 +75,14 @@
           "battery_max_discharge_kw": "Макс. снага пражњења батерије (kW, опционо)",
           "battery_min_soc": "Резерва батерије, минимално стање напуњености (%, подразумевано 10)",
           "battery_efficiency": "Ефикасност пуног циклуса батерије (%, подразумевано 90)",
-          "curtailment_entity": "Сигнал ограничења (бинарни сензор, input boolean или прекидач, опционо)"
+          "curtailment_entity": "Сигнал ограничења (бинарни сензор, input boolean или прекидач, опционо)",
+          "strict_learning_quality": "Строг квалитет учења"
         },
         "data_description": {
           "production_entity": "Kumulativni senzor energije (kWh), npr. ukupna proizvodnja pretvarača ili brojila. Senzor snage (W) neće raditi: nema dugoročnu statistiku zbira, pa bi učenje i indeks pouzdanosti ostali isključeni.",
           "battery_soc_entity": "Попуните капацитет и овај сензор да бисте укључили пројекцију стања напуњености. Потрошња куће се узима са ваше Енергетске контролне табле, сензор овде није потребан.",
-          "curtailment_entity": "Uključen dok je pretvarač ograničen iz razloga koji nebo ne objašnjava: puna baterija, nulti izvoz, ograničenje mreže. Označeni sati se ne uče kao niska proizvodnja. Bez njega se puna baterija i dalje prepoznaje iz senzora stanja napunjenosti i granice pretvarača."
+          "curtailment_entity": "Uključen dok je pretvarač ograničen iz razloga koji nebo ne objašnjava: puna baterija, nulti izvoz, ograničenje mreže. Označeni sati se ne uče kao niska proizvodnja. Bez njega se puna baterija i dalje prepoznaje iz senzora stanja napunjenosti i granice pretvarača.",
+          "strict_learning_quality": "Учи само из целих сати са изричито искљученим сигналом ограничења. Недостајућа историја се искључује. Подразумевано искључено."
         }
       },
       "lines": {

@@ -38,6 +38,7 @@ from .config import (
     inverter_max_w_from_config,
     layout_from_config,
     learning_from_config,
+    CONF_STRICT_LEARNING_QUALITY,
     lines_from_config,
     location_from_config,
     trend_anchor_hour_from_config,
@@ -58,7 +59,12 @@ from .checkup import (
 from . import repairs
 from .archive import metadata as archive_metadata
 from .analog import build_library, enrich_archive_points, enrich_points
-from .curtailment import flag_curtailed, on_intervals_from_states
+from .curtailment import (
+    flag_curtailed,
+    on_intervals_from_states,
+    constraint_intervals_from_states,
+    select_learning_buckets,
+)
 from .battery import BatterySocPoint, project_battery_soc
 from .benchmark import DEFAULT_ENDPOINT, async_upload, build_payload
 from .consumption import ConsumptionProfile, build_consumption_profile, consumption_sources
@@ -196,6 +202,11 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
         # not a silent meter).
         self.problems: List[Problem] = []
         self._issue_ids: Set[str] = set()
+        self._learning_quality = {
+            "status": "unknown",
+            "strict": bool(self._config().get(CONF_STRICT_LEARNING_QUALITY, False)),
+            "counts": {"clean": 0, "constrained": 0, "unknown": 0},
+        }
         self._production_history_read = False
 
     def _config(self) -> Dict[str, Any]:
@@ -385,6 +396,7 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
                 requested_end=now,
                 history_read=self._production_history_read,
                 stale=reused_after_failure,
+                quality=self._learning_quality,
             )
         )
         return ForecastData(
@@ -734,6 +746,11 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
     async def _build_residual_map(self, data, lat, lon, layout, cap, weather, now):
         """Learn the actual/model residual from the recorder's production history."""
         self._production_buckets = []
+        self._learning_quality = {
+            "status": "unknown",
+            "strict": bool(self._config().get(CONF_STRICT_LEARNING_QUALITY, False)),
+            "counts": {"clean": 0, "constrained": 0, "unknown": 0},
+        }
         self._production_history_read = False
         production_entity = learning_from_config(data)
         if not production_entity:
@@ -797,6 +814,7 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
             except Exception as err:  # noqa: BLE001 - best-effort
                 _LOGGER.debug("Battery state-of-charge history unavailable for curtailment detection: %s", err)
         on_intervals = None
+        quality_intervals = []
         curtail_entity = curtailment_entity_from_config(data)
         if curtail_entity:
             try:
@@ -813,11 +831,18 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
                 )
                 states = [(st.last_updated.timestamp() * 1000.0, st.state) for st in changes.get(curtail_entity, [])]
                 on_intervals = on_intervals_from_states(states, start.timestamp() * 1000.0, end.timestamp() * 1000.0)
+                quality_intervals = constraint_intervals_from_states(
+                    states, start.timestamp() * 1000.0, end.timestamp() * 1000.0
+                )
             except Exception as err:  # noqa: BLE001 - best-effort
                 _LOGGER.debug("Curtailment entity history unavailable: %s", err)
-        if soc_max_by_start_ms is None and not on_intervals:
-            return production
-        return flag_curtailed(production, soc_max_by_start_ms=soc_max_by_start_ms, cap_w=cap, on_intervals=on_intervals)
+        flagged = flag_curtailed(
+            production, soc_max_by_start_ms=soc_max_by_start_ms, cap_w=cap, on_intervals=on_intervals
+        )
+        selected, self._learning_quality = select_learning_buckets(
+            flagged, quality_intervals, strict=bool(data.get(CONF_STRICT_LEARNING_QUALITY, False))
+        )
+        return selected
 
     async def _statistics(self, stat_id, start, end, types, units):
         result = await get_instance(self.hass).async_add_executor_job(

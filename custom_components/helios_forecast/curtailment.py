@@ -91,3 +91,47 @@ def on_intervals_from_states(
     if on_since is not None and end_ms > on_since:
         out.append((on_since, end_ms))
     return out
+
+
+def constraint_intervals_from_states(
+    states: Sequence[Tuple[float, str]], start_ms: float, end_ms: float
+) -> List[Tuple[float, float, str]]:
+    """Known on/off intervals only; absent, unordered or conflicting history proves nothing.
+
+    A value before the requested start is the carried state. A first point after
+    start leaves a gap. Unknown states close knowledge until a later explicit value.
+    """
+    if not states or end_ms <= start_ms:
+        return []
+    if any(not math.isfinite(t) for t, _ in states):
+        return []
+    if any(states[i][0] >= states[i + 1][0] for i in range(len(states) - 1)):
+        return []
+    out = []
+    for i, (stamp, state) in enumerate(states):
+        until = states[i + 1][0] if i + 1 < len(states) else end_ms
+        a, b = max(stamp, start_ms), min(until, end_ms)
+        if b > a and state in {"on", "off"}:
+            out.append((a, b, state))
+    return out
+
+
+def select_learning_buckets(
+    buckets: List[ProductionBucket], intervals: Sequence[Tuple[float, float, str]], *, strict: bool = False
+) -> tuple[List[ProductionBucket], dict]:
+    """Apply one conservative mask to both learning stages, preserving legacy by default."""
+    counts = {"clean": 0, "constrained": 0, "unknown": 0}
+    selected = []
+    for bucket in buckets:
+        span = bucket.end_ms - bucket.start_ms
+        clean_ms = sum(max(0.0, min(b, bucket.end_ms) - max(a, bucket.start_ms)) for a, b, s in intervals if s == "off")
+        on = any(s == "on" and min(b, bucket.end_ms) > max(a, bucket.start_ms) for a, b, s in intervals)
+        classification = (
+            "constrained" if bucket.curtailed or on else "clean" if span > 0 and clean_ms >= span else "unknown"
+        )
+        counts[classification] += 1
+        if not strict or classification == "clean":
+            selected.append(bucket)
+    known = counts["clean"] + counts["constrained"]
+    status = "known" if buckets and not counts["unknown"] else "partial" if known else "unknown"
+    return selected, {"status": status, "strict": strict, "counts": counts}

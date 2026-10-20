@@ -23,12 +23,14 @@
           "battery_max_discharge_kw": "Hámarks afhleðsluafl rafhlöðu (kW, valfrjálst)",
           "battery_min_soc": "Varaforði rafhlöðu, lágmarks hleðslustaða (%, sjálfgefið 10)",
           "battery_efficiency": "Heildarnýtni rafhlöðu (%, sjálfgefið 90)",
-          "curtailment_entity": "Skerðingarmerki (tvíundaskynjari, input boolean eða rofi, valfrjálst)"
+          "curtailment_entity": "Skerðingarmerki (tvíundaskynjari, input boolean eða rofi, valfrjálst)",
+          "strict_learning_quality": "Ströng gæði náms"
         },
         "data_description": {
           "production_entity": "Uppsafnaður orkuskynjari (kWh), t.d. heildarframleiðsla áriðils eða orkumælis. Aflskynjari (W) virkar ekki: hann hefur enga langtímasummutölfræði, svo lærdómurinn og áreiðanleikavísitalan yrðu áfram óvirk.",
           "battery_soc_entity": "Fylltu út getuna og þennan skynjara til að kveikja á spá um hleðslustöðu. Heimilisnotkunin er tekin af Orku-stjórnborðinu þínu, svo ekki þarf skynjara hér.",
-          "curtailment_entity": "Kveikt á meðan áriðillinn er skertur af ástæðu sem himinninn skýrir ekki: full rafhlaða, engin útflutningur, netmörk. Merktu tímarnir eru ekki lærðir sem lág framleiðsla. Án þess greinist full rafhlaða samt út frá hleðslustöðuskynjara og hámarki áriðilsins."
+          "curtailment_entity": "Kveikt á meðan áriðillinn er skertur af ástæðu sem himinninn skýrir ekki: full rafhlaða, engin útflutningur, netmörk. Merktu tímarnir eru ekki lærðir sem lág framleiðsla. Án þess greinist full rafhlaða samt út frá hleðslustöðuskynjara og hámarki áriðilsins.",
+          "strict_learning_quality": "Læra aðeins af heilum klukkustundum með skýrt slökktu takmörkunarmerki. Sögugögn sem vantar eru útilokuð. Sjálfgefið slökkt."
         }
       },
       "line": {
@@ -73,12 +75,14 @@
           "battery_max_discharge_kw": "Hámarks afhleðsluafl rafhlöðu (kW, valfrjálst)",
           "battery_min_soc": "Varaforði rafhlöðu, lágmarks hleðslustaða (%, sjálfgefið 10)",
           "battery_efficiency": "Heildarnýtni rafhlöðu (%, sjálfgefið 90)",
-          "curtailment_entity": "Skerðingarmerki (tvíundaskynjari, input boolean eða rofi, valfrjálst)"
+          "curtailment_entity": "Skerðingarmerki (tvíundaskynjari, input boolean eða rofi, valfrjálst)",
+          "strict_learning_quality": "Ströng gæði náms"
         },
         "data_description": {
           "production_entity": "Uppsafnaður orkuskynjari (kWh), t.d. heildarframleiðsla áriðils eða orkumælis. Aflskynjari (W) virkar ekki: hann hefur enga langtímasummutölfræði, svo lærdómurinn og áreiðanleikavísitalan yrðu áfram óvirk.",
           "battery_soc_entity": "Fylltu út getuna og þennan skynjara til að kveikja á spá um hleðslustöðu. Heimilisnotkunin er tekin af Orku-stjórnborðinu þínu, svo ekki þarf skynjara hér.",
-          "curtailment_entity": "Kveikt á meðan áriðillinn er skertur af ástæðu sem himinninn skýrir ekki: full rafhlaða, engin útflutningur, netmörk. Merktu tímarnir eru ekki lærðir sem lág framleiðsla. Án þess greinist full rafhlaða samt út frá hleðslustöðuskynjara og hámarki áriðilsins."
+          "curtailment_entity": "Kveikt á meðan áriðillinn er skertur af ástæðu sem himinninn skýrir ekki: full rafhlaða, engin útflutningur, netmörk. Merktu tímarnir eru ekki lærðir sem lág framleiðsla. Án þess greinist full rafhlaða samt út frá hleðslustöðuskynjara og hámarki áriðilsins.",
+          "strict_learning_quality": "Læra aðeins af heilum klukkustundum með skýrt slökktu takmörkunarmerki. Sögugögn sem vantar eru útilokuð. Sjálfgefið slökkt."
         }
       },
       "lines": {

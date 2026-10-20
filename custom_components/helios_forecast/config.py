@@ -32,6 +32,7 @@ CONF_BATTERY_CAPACITY_KWH = "battery_capacity_kwh"
 CONF_BATTERY_SOC_ENTITY = "battery_soc_entity"
 # Optional binary signal, on while the inverter is held back (zero export, grid limit): its hours are not learned.
 CONF_CURTAILMENT_ENTITY = "curtailment_entity"
+CONF_STRICT_LEARNING_QUALITY = "strict_learning_quality"
 CONF_BATTERY_MAX_CHARGE_KW = "battery_max_charge_kw"
 CONF_BATTERY_MAX_DISCHARGE_KW = "battery_max_discharge_kw"
 CONF_BATTERY_MIN_SOC = "battery_min_soc"
@@ -86,6 +87,7 @@ SETTINGS_KEYS: Tuple[str, ...] = (
     CONF_BATTERY_MIN_SOC,
     CONF_BATTERY_EFFICIENCY,
     CONF_CURTAILMENT_ENTITY,
+    CONF_STRICT_LEARNING_QUALITY,
     CONF_BENCHMARK_ENABLED,
 )
 

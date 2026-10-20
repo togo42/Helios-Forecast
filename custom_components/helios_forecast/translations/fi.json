@@ -23,12 +23,14 @@
           "battery_max_discharge_kw": "Akun suurin purkausteho (kW, valinnainen)",
           "battery_min_soc": "Akun varaus, vähimmäisvaraustila (%, oletus 10)",
           "battery_efficiency": "Akun edestakainen hyötysuhde (%, oletus 90)",
-          "curtailment_entity": "Rajoitussignaali (binäärianturi, input boolean tai kytkin, valinnainen)"
+          "curtailment_entity": "Rajoitussignaali (binäärianturi, input boolean tai kytkin, valinnainen)",
+          "strict_learning_quality": "Tiukka oppimisen laatu"
         },
         "data_description": {
           "production_entity": "Kumulatiivinen energia-anturi (kWh), esim. invertterin tai energiamittarin kokonaistuotanto. Tehoanturi (W) ei toimi: sillä ei ole pitkän aikavälin summatilastoja, joten oppiminen ja luotettavuusindeksi jäisivät pois päältä.",
           "battery_soc_entity": "Täytä kapasiteetti ja tämä anturi ottaaksesi varaustilan ennusteen käyttöön. Kodin kulutus haetaan Energia-koontinäytöstä, joten tähän ei tarvita anturia.",
-          "curtailment_entity": "Päällä, kun invertteriä rajoitetaan syystä, jota taivas ei selitä: täysi akku, nollasyöttö, verkkoraja. Merkittyjä tunteja ei opita matalana tuotantona. Ilman sitä täysi akku tunnistetaan silti varaustila-anturista ja invertterin rajasta."
+          "curtailment_entity": "Päällä, kun invertteriä rajoitetaan syystä, jota taivas ei selitä: täysi akku, nollasyöttö, verkkoraja. Merkittyjä tunteja ei opita matalana tuotantona. Ilman sitä täysi akku tunnistetaan silti varaustila-anturista ja invertterin rajasta.",
+          "strict_learning_quality": "Opi vain kokonaisista tunneista, joiden rajoitussignaali on nimenomaisesti pois päältä. Puuttuva historia jätetään pois. Oletuksena pois päältä."
         }
       },
       "line": {
@@ -73,12 +75,14 @@
           "battery_max_discharge_kw": "Akun suurin purkausteho (kW, valinnainen)",
           "battery_min_soc": "Akun varaus, vähimmäisvaraustila (%, oletus 10)",
           "battery_efficiency": "Akun edestakainen hyötysuhde (%, oletus 90)",
-          "curtailment_entity": "Rajoitussignaali (binäärianturi, input boolean tai kytkin, valinnainen)"
+          "curtailment_entity": "Rajoitussignaali (binäärianturi, input boolean tai kytkin, valinnainen)",
+          "strict_learning_quality": "Tiukka oppimisen laatu"
         },
         "data_description": {
           "production_entity": "Kumulatiivinen energia-anturi (kWh), esim. invertterin tai energiamittarin kokonaistuotanto. Tehoanturi (W) ei toimi: sillä ei ole pitkän aikavälin summatilastoja, joten oppiminen ja luotettavuusindeksi jäisivät pois päältä.",
           "battery_soc_entity": "Täytä kapasiteetti ja tämä anturi ottaaksesi varaustilan ennusteen käyttöön. Kodin kulutus haetaan Energia-koontinäytöstä, joten tähän ei tarvita anturia.",
-          "curtailment_entity": "Päällä, kun invertteriä rajoitetaan syystä, jota taivas ei selitä: täysi akku, nollasyöttö, verkkoraja. Merkittyjä tunteja ei opita matalana tuotantona. Ilman sitä täysi akku tunnistetaan silti varaustila-anturista ja invertterin rajasta."
+          "curtailment_entity": "Päällä, kun invertteriä rajoitetaan syystä, jota taivas ei selitä: täysi akku, nollasyöttö, verkkoraja. Merkittyjä tunteja ei opita matalana tuotantona. Ilman sitä täysi akku tunnistetaan silti varaustila-anturista ja invertterin rajasta.",
+          "strict_learning_quality": "Opi vain kokonaisista tunneista, joiden rajoitussignaali on nimenomaisesti pois päältä. Puuttuva historia jätetään pois. Oletuksena pois päältä."
         }
       },
       "lines": {

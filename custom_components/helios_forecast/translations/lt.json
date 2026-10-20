@@ -23,12 +23,14 @@
           "battery_max_discharge_kw": "Maks. akumuliatoriaus iškrovimo galia (kW, neprivaloma)",
           "battery_min_soc": "Akumuliatoriaus rezervas, minimali įkrova (%, numatytoji 10)",
           "battery_efficiency": "Akumuliatoriaus ciklo naudingumas (%, numatytasis 90)",
-          "curtailment_entity": "Ribojimo signalas (dvejetainis jutiklis, input boolean arba jungiklis, nebūtina)"
+          "curtailment_entity": "Ribojimo signalas (dvejetainis jutiklis, input boolean arba jungiklis, nebūtina)",
+          "strict_learning_quality": "Griežta mokymosi kokybė"
         },
         "data_description": {
           "production_entity": "Kaupiamasis energijos jutiklis (kWh), pvz., bendra inverterio ar skaitiklio gamyba. Galios jutiklis (W) neveiks: jis neturi ilgalaikės sumos statistikos, todėl mokymasis ir patikimumo indeksas liktų išjungti.",
           "battery_soc_entity": "Užpildykite talpą ir šį jutiklį, kad įjungtumėte įkrovos prognozę. Namų suvartojimas imamas iš Energijos skydelio, jutiklio čia nereikia.",
-          "curtailment_entity": "Įjungtas, kol inverteris ribojamas dėl priežasties, kurios dangus nepaaiškina: pilna baterija, nulinis eksportas, tinklo riba. Pažymėtos valandos nemokomos kaip maža gamyba. Be jo pilna baterija vis tiek aptinkama pagal įkrovos lygio jutiklį ir inverterio ribą."
+          "curtailment_entity": "Įjungtas, kol inverteris ribojamas dėl priežasties, kurios dangus nepaaiškina: pilna baterija, nulinis eksportas, tinklo riba. Pažymėtos valandos nemokomos kaip maža gamyba. Be jo pilna baterija vis tiek aptinkama pagal įkrovos lygio jutiklį ir inverterio ribą.",
+          "strict_learning_quality": "Mokytis tik iš pilnų valandų su aiškiai išjungtu ribojimo signalu. Trūkstama istorija neįtraukiama. Pagal numatymą išjungta."
         }
       },
       "line": {
@@ -73,12 +75,14 @@
           "battery_max_discharge_kw": "Maks. akumuliatoriaus iškrovimo galia (kW, neprivaloma)",
           "battery_min_soc": "Akumuliatoriaus rezervas, minimali įkrova (%, numatytoji 10)",
           "battery_efficiency": "Akumuliatoriaus ciklo naudingumas (%, numatytasis 90)",
-          "curtailment_entity": "Ribojimo signalas (dvejetainis jutiklis, input boolean arba jungiklis, nebūtina)"
+          "curtailment_entity": "Ribojimo signalas (dvejetainis jutiklis, input boolean arba jungiklis, nebūtina)",
+          "strict_learning_quality": "Griežta mokymosi kokybė"
         },
         "data_description": {
           "production_entity": "Kaupiamasis energijos jutiklis (kWh), pvz., bendra inverterio ar skaitiklio gamyba. Galios jutiklis (W) neveiks: jis neturi ilgalaikės sumos statistikos, todėl mokymasis ir patikimumo indeksas liktų išjungti.",
           "battery_soc_entity": "Užpildykite talpą ir šį jutiklį, kad įjungtumėte įkrovos prognozę. Namų suvartojimas imamas iš Energijos skydelio, jutiklio čia nereikia.",
-          "curtailment_entity": "Įjungtas, kol inverteris ribojamas dėl priežasties, kurios dangus nepaaiškina: pilna baterija, nulinis eksportas, tinklo riba. Pažymėtos valandos nemokomos kaip maža gamyba. Be jo pilna baterija vis tiek aptinkama pagal įkrovos lygio jutiklį ir inverterio ribą."
+          "curtailment_entity": "Įjungtas, kol inverteris ribojamas dėl priežasties, kurios dangus nepaaiškina: pilna baterija, nulinis eksportas, tinklo riba. Pažymėtos valandos nemokomos kaip maža gamyba. Be jo pilna baterija vis tiek aptinkama pagal įkrovos lygio jutiklį ir inverterio ribą.",
+          "strict_learning_quality": "Mokytis tik iš pilnų valandų su aiškiai išjungtu ribojimo signalu. Trūkstama istorija neįtraukiama. Pagal numatymą išjungta."
         }
       },
       "lines": {

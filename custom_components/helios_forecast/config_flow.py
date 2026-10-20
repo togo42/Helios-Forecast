@@ -31,6 +31,7 @@ from .config import (
     CONF_BATTERY_SOC_ENTITY,
     CONF_BENCHMARK_ENABLED,
     CONF_CURTAILMENT_ENTITY,
+    CONF_STRICT_LEARNING_QUALITY,
     CONF_INVERTER_MAX_KW,
     CONF_KWP,
     CONF_LATITUDE,
@@ -180,6 +181,7 @@ def _settings_fields(
     # Curtailment signal: on while the inverter is held back for a reason the sky cannot explain, so those
     # hours are not learned as low production (zero export, grid limits; a full battery is detected without it).
     _optional(fields, CONF_CURTAILMENT_ENTITY, _CURTAIL_ENTITY, s.get(CONF_CURTAILMENT_ENTITY))
+    fields[vol.Optional(CONF_STRICT_LEARNING_QUALITY, default=s.get(CONF_STRICT_LEARNING_QUALITY, False))] = _BOOL
     return fields
 
 
