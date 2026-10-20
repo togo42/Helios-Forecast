@@ -44,3 +44,10 @@ gates; the migration runbook is prospective. Independent R and coordinator
 external review/CI readback remain open at this implementation commit.
 
 Intended commit: `infra: require pinned Gemini review for every Helios delivery`.
+
+Before the final review freeze, the provider facade explicitly repeats the exact
+three-key JSON schema in its separate final turn, including the no-tools/no-prose
+rules and empty-findings/conditions requirement for mergeable. This avoids relying
+on an instruction appearing only in an early context chunk; parser strictness,
+ACK sequencing and no-retry behavior remain unchanged. The 13 offline CLI tests
+were rerun after this instruction change and passed.
