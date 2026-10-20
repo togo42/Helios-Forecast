@@ -9,6 +9,10 @@ date-based versioning scheme (`YEAR.MONTH.PATCH`).
 
 ### Fixed
 
+- Backport the upstream benchmark description placeholders to the development
+  branch so translations pass Home Assistant validation. Keep the benchmark
+  optional and verify the options form supplies its results-page address.
+
 Forecast intervals now advance in elapsed UTC time across daylight saving transitions. Local spring and autumn days retain all 92 or 100 quarter-hours, including both autumn offsets, without changing the forecast response schema.
 
 ---
