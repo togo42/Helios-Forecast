@@ -13,6 +13,8 @@ date-based versioning scheme (`YEAR.MONTH.PATCH`).
   branch so translations pass Home Assistant validation. Keep the benchmark
   optional and verify the options form supplies its results-page address.
 
+Hourly archive refreshes use a stable per-entry phase between HH:05 and HH:09 instead of one shared HH:07:00 trigger. Weather retries wait with bounded jitter beyond brief overloads while preserving three attempts and cancellation.
+
 ---
 
 ## 2026.9.6
