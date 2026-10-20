@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Kerfi",
           "description": "Hvaða Helios Forecast uppsetningu á að lesa. Valfrjálst þegar aðeins ein er stillt."
+        },
+        "include_provenance": {
+          "name": "Hafa uppruna með",
+          "description": "Bætir við útgáfugreindum lýsigögnum inntaks og útreiknings. Sjálfgefið svar er óbreytt."
         }
       }
     },

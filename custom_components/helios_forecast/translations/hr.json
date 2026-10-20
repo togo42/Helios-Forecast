@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Instalacija",
           "description": "Koju Helios Forecast instalaciju čitati. Neobavezno kada je konfigurirana samo jedna."
+        },
+        "include_provenance": {
+          "name": "Uključi podrijetlo",
+          "description": "Uključuje verzionirane metapodatke ulaza i izračuna. Zadani odgovor ostaje nepromijenjen."
         }
       }
     },

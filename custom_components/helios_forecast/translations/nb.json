@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Anlegg",
           "description": "Hvilken Helios Forecast-installasjon som skal leses. Valgfritt når bare én er konfigurert."
+        },
+        "include_provenance": {
+          "name": "Ta med opprinnelse",
+          "description": "Tar med versjonerte metadata om inndata og beregning. Standardsvaret er uendret."
         }
       }
     },

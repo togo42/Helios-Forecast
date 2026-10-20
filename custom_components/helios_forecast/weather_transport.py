@@ -31,7 +31,12 @@ class WeatherTransport:
         self._pending: dict[tuple, _Flight] = {}
 
     async def fetch(
-        self, session: Any, url: str, parser: Any, fetch: Callable[[], Coroutine[Any, Any, _T | None]]
+        self,
+        session: Any,
+        url: str,
+        parser: Any,
+        fetch: Callable[[], Coroutine[Any, Any, _T | None]],
+        on_reuse: Callable[[_T], _T] | None = None,
     ) -> _T | None:
         loop = asyncio.get_running_loop()
         key = (loop, session, url, parser)
@@ -42,8 +47,10 @@ class WeatherTransport:
         cached = self._cache.get(key)
         if cached is not None:
             self._cache.move_to_end(key)
-            return copy.deepcopy(cached[1])
+            value = copy.deepcopy(cached[1])
+            return on_reuse(value) if on_reuse is not None else value
         flight = self._pending.get(key)
+        shared = flight is not None
         if flight is None:
             flight = _Flight(loop.create_task(fetch()))
             self._pending[key] = flight
@@ -54,7 +61,8 @@ class WeatherTransport:
                 self._cache[key] = (loop.time() + CACHE_SECONDS, copy.deepcopy(result))
                 while len(self._cache) > CACHE_ENTRIES:
                     self._cache.popitem(last=False)
-            return copy.deepcopy(result)
+            value = copy.deepcopy(result)
+            return on_reuse(value) if shared and value is not None and on_reuse is not None else value
         finally:
             flight.users -= 1
             if flight.users == 0:
@@ -71,7 +79,12 @@ _SHARED = WeatherTransport()
 
 
 async def coalesced_fetch(
-    session: Any, url: str, parser: Any, fetch: Callable[[], Coroutine[Any, Any, _T | None]]
+    session: Any,
+    url: str,
+    parser: Any,
+    fetch: Callable[[], Coroutine[Any, Any, _T | None]],
+    *,
+    on_reuse: Callable[[_T], _T] | None = None,
 ) -> _T | None:
     """Share identical successful work without sharing mutable returned objects."""
-    return await _SHARED.fetch(session, url, parser, fetch)
+    return await _SHARED.fetch(session, url, parser, fetch, on_reuse=on_reuse)

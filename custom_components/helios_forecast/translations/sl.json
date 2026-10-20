@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Naprava",
           "description": "Katero namestitev Helios Forecast prebrati. Neobvezno, kadar je konfigurirana samo ena."
+        },
+        "include_provenance": {
+          "name": "Vključi izvor",
+          "description": "Vključi različične metapodatke vhodov in izračuna. Privzeti odgovor ostane nespremenjen."
         }
       }
     },

@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Instalace",
           "description": "Kterou instalaci Helios Forecast načíst. Nepovinné, když je nakonfigurována jen jedna."
+        },
+        "include_provenance": {
+          "name": "Zahrnout původ",
+          "description": "Zahrne verzovaná metadata vstupů a výpočtu. Výchozí odpověď se nemění."
         }
       }
     },

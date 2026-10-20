@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Anlage",
           "description": "Welche Helios-Forecast-Installation gelesen werden soll. Optional, wenn nur eine konfiguriert ist."
+        },
+        "include_provenance": {
+          "name": "Herkunft einschließen",
+          "description": "Versionierte Metadaten zu Eingaben und Berechnung einschließen. Die Standardantwort bleibt unverändert."
         }
       }
     },

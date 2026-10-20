@@ -12,7 +12,7 @@ from __future__ import annotations
 import asyncio
 import math
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, field as dataclass_field
 from datetime import date, datetime, timedelta
 from functools import partial
 from typing import Any, Dict, List, Optional, Set
@@ -66,6 +66,7 @@ from .trend import TodayTrend, TrendReference, compute_trend, should_capture
 from .const import DOMAIN
 from .forecast import ForecastPoint, build_forecast_series
 from .openmeteo import WeatherSeries, fetch_weather
+from .provenance import build_provenance
 from .reliability import SKILL_WINDOW_DAYS, Reliability, compute_reliability
 from .statistics import (
     ARCHIVED_SERIES,
@@ -132,6 +133,7 @@ class ForecastData:
     # against the learned consumption profile. Empty when the battery feature is off or has no
     # usable input (no capacity / SoC entity / consumption history). Feeds the SoC sensor + service.
     battery_soc: List[BatterySocPoint]
+    provenance: Dict[str, Any] = dataclass_field(default_factory=dict)
 
 
 class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
@@ -266,6 +268,7 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
         # answers whole UTC days while the horizon below runs on local midnights, so west of Greenwich
         # the last local day ends after the final UTC hour of a FORECAST_DAYS window; one day of slack
         # covers every offset, and build_forecast_series stops at the weather either way.
+        reused_after_failure = False
         try:
             weather = await fetch_weather(session, lat, lon, past_days=LEARN_DAYS, forecast_days=FORECAST_DAYS + 1)
             if weather is not None:
@@ -277,6 +280,7 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
             elif self.weather_series is not None:
                 _LOGGER.warning("Open-Meteo returned no weather data; reusing the last successful fetch")
                 weather = self.weather_series
+                reused_after_failure = True
         except Exception as err:  # noqa: BLE001 - any transport error becomes a retry
             raise UpdateFailed(f"Open-Meteo fetch failed: {err}") from err
 
@@ -371,7 +375,20 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
         self._publish_problems(problems)
         await self._maybe_upload_benchmark(data, lat, lon, points, reliability, now_utc)
 
+        provenance = await self.hass.async_add_executor_job(
+            partial(
+                build_provenance,
+                weather=weather,
+                config={"settings": data, "latitude": lat, "longitude": lon, "layout": layout, "inverter_max_w": cap},
+                buckets=self._production_buckets,
+                requested_start=now - timedelta(days=LEARN_DAYS),
+                requested_end=now,
+                history_read=self._production_history_read,
+                stale=reused_after_failure,
+            )
+        )
         return ForecastData(
+            provenance=provenance,
             points=points,
             summary=summary,
             observed=observed,

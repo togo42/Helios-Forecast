@@ -126,6 +126,10 @@
         "config_entry_id": {
           "name": "Sistema",
           "description": "Kurią Helios Forecast įdiegtį nuskaityti. Nebūtina, kai sukonfigūruota tik viena."
+        },
+        "include_provenance": {
+          "name": "Įtraukti kilmę",
+          "description": "Įtraukia versijuotus įvesties ir skaičiavimo metaduomenis. Numatytasis atsakymas nesikeičia."
         }
       }
     },

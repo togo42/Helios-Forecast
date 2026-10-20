@@ -110,3 +110,26 @@ async def test_async_register_services_is_idempotent(hass) -> None:
     services_mod.async_register_services(hass)  # must not raise / double-register
     assert hass.services.has_service(DOMAIN, "get_forecast")
     assert hass.services.has_service(DOMAIN, "get_battery_soc_forecast")
+
+
+async def test_get_forecast_provenance_opt_in_and_copy(hass):
+    coordinator = _coordinator_with()
+    coordinator.data.provenance = {
+        "schema_version": "helios.forecast.v1",
+        "learning": {"constraint_quality": "unknown"},
+    }
+    hass.data[DOMAIN] = {"entry1": coordinator}
+    services_mod.async_register_services(hass)
+    legacy = await hass.services.async_call(DOMAIN, "get_forecast", {}, blocking=True, return_response=True)
+    assert legacy == {"forecast": []}
+    result = await hass.services.async_call(
+        DOMAIN, "get_forecast", {"include_provenance": True}, blocking=True, return_response=True
+    )
+    assert result["provenance"] == coordinator.data.provenance
+    result["provenance"]["learning"]["constraint_quality"] = "forged"
+    assert coordinator.data.provenance["learning"]["constraint_quality"] == "unknown"
+    coordinator.data = None
+    result = await hass.services.async_call(
+        DOMAIN, "get_forecast", {"include_provenance": True}, blocking=True, return_response=True
+    )
+    assert result == {"forecast": [], "provenance": None}
