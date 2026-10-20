@@ -1,0 +1,28 @@
+{
+  "baseline": "ce2838fe79cf1fda306ad853e8f102b91b2cc364",
+  "version": "2026.10.0rc1",
+  "tag": "v2026.10.0rc1",
+  "domain": "helios_forecast",
+  "manifest_changes": [
+    "version",
+    "documentation",
+    "issue_tracker",
+    "codeowners"
+  ],
+  "archive": "helios_forecast.zip",
+  "receipt": "release-receipt.json",
+  "metadata": {
+    "documentation": "https://github.com/togo42/Helios-Forecast",
+    "issue_tracker": "https://github.com/togo42/Helios-Forecast/issues",
+    "codeowners": [
+      "@togo42"
+    ]
+  },
+  "hacs": {
+    "name": "Helios Forecast (togo42 fork)",
+    "homeassistant": "2025.11.0",
+    "hide_default_branch": true,
+    "zip_release": true,
+    "filename": "helios_forecast.zip"
+  }
+}
