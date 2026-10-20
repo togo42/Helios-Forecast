@@ -20,6 +20,30 @@ later upstream changes are excluded. The separate DST/refresh contributions and
 internal cache/provenance/strict-learning PRs stay unchanged. Do not bulk merge
 develop or those PR branches into the release.
 
+For subsequent work, fetch without changing a working branch:
+
+```sh
+git fetch upstream --prune
+```
+
+In a clean checkout of `main`, advance the mirror only with
+`git merge --ff-only upstream/main`; stop on divergence. Create each `feature/*`
+branch from the explicitly selected upstream base, keep its general fix separate,
+and open an upstream PR from that feature branch after its own gates. Curate
+`fork/stable` through a dedicated integration branch with named, reviewed and
+tested changes; use targeted checked cherry-picks or equivalent explicit
+integration. Do not blanket-merge upstream develop or all open feature PRs.
+Prepare `release/*` from that curated result and complete acceptance/review gates
+before advancing release references or publishing. No command in this workflow
+authorizes an automatic merge, push, tag or HA rollout.
+
+Once published, integrate `fork/stable` only forward; do not rebase it or force
+push it. Never replace published tags or release assets: corrections receive a
+new version. Keep a general test-fixture correction as a separate upstream
+follow-up to the existing refresh contribution; do not silently change its
+existing PR head or publish a duplicate PR. Manufacturer integration stays a
+separate decision.
+
 ## Build and verify
 
 Use Python 3.13 and Git. Commit the approved delivery first, then replace PIN
@@ -53,10 +77,12 @@ SHA-256 and each member's SHA-256. It is not installed into the integration.
 The candidate's `hacs.json` identifies the fork, hides the default branch and
 selects `helios_forecast.zip`. HACS extracts release ZIPs directly into
 `custom_components/<domain>`; therefore the ZIP's root contains `manifest.json`,
-not a wrapping `custom_components/helios_forecast` directory. Source checked on
-2026-10-20: [HACS base repository downloader](https://github.com/hacs/integration/blob/main/custom_components/hacs/repositories/base.py)
+not a wrapping `custom_components/helios_forecast` directory. Read-only HA
+inventory on 2026-10-20 reported HACS **2.0.5**. Source checked on that date at
+tag `2.0.5`, commit `c0dfd8b44297c3673c21973e2539375a53687a9c`:
+[HACS base repository downloader](https://github.com/hacs/integration/blob/c0dfd8b44297c3673c21973e2539375a53687a9c/custom_components/hacs/repositories/base.py)
 (`async_download_zip_file`, `async_get_hacs_json`) and
-[integration localpath](https://github.com/hacs/integration/blob/main/custom_components/hacs/repositories/integration.py).
+[integration localpath](https://github.com/hacs/integration/blob/c0dfd8b44297c3673c21973e2539375a53687a9c/custom_components/hacs/repositories/integration.py).
 [HACS metadata documentation](https://hacs.xyz/docs/publish/start/) describes
 `zip_release`, `filename` and `hide_default_branch`.
 
@@ -64,10 +90,12 @@ HACS reads metadata via `ref or version_to_download()`, so installation at an
 explicit release selection uses that release's metadata. The unchanged mirror's
 metadata cannot advertise fork restrictions when users explicitly select main.
 Do not claim every HACS discovery/UI path has been exercised: this is source
-inspection, not a live HACS installation. Before publication, confirm the selected
-prerelease metadata and asset URL with the exact HACS version in use. A prerelease
-may require enabling prereleases in HACS. Do not use the default branch as a
-replacement for the fixed candidate release.
+inspection, not a live HACS installation. Before publication, check selected-tag
+metadata, manifest and the exact release asset URL without writing to HA. HACS
+2.0.5's `show_beta` selection must permit prereleases; explicitly select the fixed
+candidate version. Do not use the default branch as a replacement for that
+release. A real HACS UI installation/readback remains a later separately
+authorized HA rollout gate, not a prerequisite requiring productive writes now.
 
 Run the complete pure and Home Assistant suites, pinned Ruff lint/format and mypy,
 independent behavioral acceptance and final external review against the frozen
