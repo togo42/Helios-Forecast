@@ -87,9 +87,11 @@ async def test_deleting_the_entry_takes_its_archived_series_with_it(hass, monkey
     async def remove_store(store):
         removed_stores.append(store.key)
 
-    monkeypatch.setattr("homeassistant.helpers.storage.Store.async_remove", remove_store)
-
-    await async_remove_entry(hass, entry)
+    # Restore the fixture's storage mock before hass_storage tears it down;
+    # restoring it later would leave a stale autospec mock on the Store class.
+    with monkeypatch.context() as patcher:
+        patcher.setattr("homeassistant.helpers.storage.Store.async_remove", remove_store)
+        await async_remove_entry(hass, entry)
 
     assert set(cleared) == {external_statistic_id(entry.entry_id, key) for key, _u, _n in ARCHIVED_SERIES}
     assert set(removed_stores) == {
