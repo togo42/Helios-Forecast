@@ -13,6 +13,10 @@ date-based versioning scheme (`YEAR.MONTH.PATCH`).
   branch so translations pass Home Assistant validation. Keep the benchmark
   optional and verify the options form supplies its results-page address.
 
+Forecast intervals now advance in elapsed UTC time across daylight saving transitions. Local spring and autumn days retain all 92 or 100 quarter-hours, including both autumn offsets, without changing the forecast response schema.
+
+Hourly archive refreshes use a stable per-entry phase between HH:05 and HH:09 instead of one shared HH:07:00 trigger. Weather retries wait with bounded jitter beyond brief overloads while preserving three attempts and cancellation.
+
 ---
 
 ## 2026.9.6
