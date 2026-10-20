@@ -726,3 +726,13 @@ async def test_the_archive_mark_never_moves_backwards(hass, monkeypatch) -> None
     ahead = coordinator._last_weather_stat_hour
     coordinator.write_weather_statistics(now_utc - timedelta(hours=3))
     assert coordinator._last_weather_stat_hour == ahead
+
+
+async def test_cached_weather_keeps_original_archive_cutoff(hass, monkeypatch):
+    original = dt_util.utcnow() - timedelta(hours=3)
+    weather = replace(make_weather_series(dt_util.utcnow()), received_at=original)
+    coordinator = HeliosForecastCoordinator(hass, _entry(hass))
+    monkeypatch.setattr(coordinator_mod, "fetch_weather", AsyncMock(return_value=weather))
+    await coordinator.async_refresh()
+    assert coordinator.last_update_success
+    assert coordinator._weather_fetched_at == original

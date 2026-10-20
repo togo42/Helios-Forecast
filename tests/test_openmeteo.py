@@ -455,3 +455,16 @@ if __name__ == "__main__":
             fn()
             print(f"ok  {name}")
     print("all openmeteo tests passed")
+
+
+def test_weather_cache_preserves_original_receipt():
+    async def run():
+        session = _FakeSession([_FakeResp(200, _GOOD_WEATHER)], [_FakeResp(200, _ENSEMBLE_SPREAD)])
+        first = await fetch_weather(session, 1.0, 2.0)
+        second = await fetch_weather(session, 1.0, 2.0)
+        assert first is not None and second is not None
+        assert first.received_at is not None
+        assert first.received_at == second.received_at
+        assert first is not second
+
+    asyncio.run(run())

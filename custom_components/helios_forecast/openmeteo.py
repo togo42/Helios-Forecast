@@ -25,6 +25,8 @@ from dataclasses import dataclass, field, replace
 from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any, Callable, List, Optional, TypeVar
 
+from .weather_transport import coalesced_fetch
+
 _LOGGER = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
@@ -148,6 +150,8 @@ class WeatherSeries:
     # None where the ensemble said nothing about an hour, never 0.0: a missing answer is not the
     # models agreeing perfectly, and the reliability index reads this as agreement.
     cloud_spread: list[Optional[float]] = field(default_factory=list)
+    # The original successful HTTP receipt, retained across cache copies.
+    received_at: datetime | None = None
 
 
 def build_weather_url(
@@ -325,7 +329,7 @@ async def _get_json(session: ClientSession, url: str) -> Optional[dict]:
         return None
 
 
-async def _fetch_parsed(
+async def _fetch_parsed_uncached(
     session: ClientSession, url: str, parser: Callable[[dict[str, Any]], Optional[_T]]
 ) -> Optional[_T]:
     """GET ``url`` and run ``parser``, retrying an empty/non-200 response. None once exhausted."""
@@ -333,10 +337,19 @@ async def _fetch_parsed(
         payload = await _get_json(session, url)
         result = parser(payload) if payload is not None else None
         if result is not None:
+            if isinstance(result, WeatherSeries):
+                result = replace(result, received_at=datetime.now(timezone.utc))
             return result
         if attempt + 1 < _RETRY_ATTEMPTS:
             await asyncio.sleep(_RETRY_DELAY_S)
     return None
+
+
+async def _fetch_parsed(
+    session: ClientSession, url: str, parser: Callable[[dict[str, Any]], Optional[_T]]
+) -> Optional[_T]:
+    """Share successful identical requests briefly, preserving retry and timeout semantics."""
+    return await coalesced_fetch(session, url, parser, lambda: _fetch_parsed_uncached(session, url, parser))
 
 
 async def _ensemble_spread(session: ClientSession, url: str) -> Optional[tuple[list[datetime], list[float]]]:

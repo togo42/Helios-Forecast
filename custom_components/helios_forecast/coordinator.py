@@ -269,7 +269,7 @@ class HeliosForecastCoordinator(DataUpdateCoordinator[ForecastData]):
         try:
             weather = await fetch_weather(session, lat, lon, past_days=LEARN_DAYS, forecast_days=FORECAST_DAYS + 1)
             if weather is not None:
-                self._weather_fetched_at = dt_util.utcnow()
+                self._weather_fetched_at = weather.received_at or dt_util.utcnow()
             # A transient empty response should not blank the forecast: reuse the last good fetch so
             # the model still runs, for as long as the service stays silent. What that series does not
             # gain is knowledge of the hours since, which is why the archive is bounded by the fetch
